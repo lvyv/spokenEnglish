@@ -8,4 +8,4 @@ mwc add a line in the file.
 
 lidenu add line in the file
 
-lyx add
+lyx add line in the file

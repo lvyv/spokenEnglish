@@ -44,7 +44,7 @@ class EdgeTTS(Singleton, TextToSpeech):
                 messages.extend(message["data"])
         await websocket.send_bytes(bytes(messages))
 
-    async def generate_audio(self, text, voice_id="en-US-EricNeural", language="en-US") -> bytes:
+    async def generate_audio(self, text, voice_id="", language="en-US") -> bytes:
         voices = await VoicesManager.create()
         voice = voices.find(ShortName=voice_id)[0]
         communicate = Communicate(text, voice["Name"], rate="+20%")

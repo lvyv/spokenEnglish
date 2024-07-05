@@ -115,7 +115,7 @@ class WhisperX(Singleton, SpeechToText):
 
     @timed
     def transcribe(self, audio_bytes, platform="web", prompt="", language="", suppress_tokens=[-1]):
-        logger.info("Transcribing audio...")
+        logger.info("whisperX 118 Transcribing audio...")
         result = self._transcribe(audio_bytes, platform, prompt, language, suppress_tokens)
         if isinstance(result, dict):
             segments = result.get("segments", [])

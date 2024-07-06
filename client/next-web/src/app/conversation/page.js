@@ -1,156 +1,138 @@
 'use client';
 
+// 导入必要的组件和库
 import { Button } from '@nextui-org/button';
 import { Tooltip } from '@nextui-org/tooltip';
-import SettingBar from './_components/SettingBar';
-import Chat from './_components/Chat';
-import HandsFreeMode from './_components/HandsFreeMode';
-import TextMode from './_components/TextMode';
-import HamburgerMenu from './_components/HamburgerMenu';
-import ShareButton from './_components/SettingBar/ShareButton';
-import TabButton from '@/components/TabButton';
-import Image from 'next/image';
-import exitIcon from '@/assets/svgs/exit.svg';
-import { BsChatRightText, BsTelephone } from 'react-icons/bs';
-import { useEffect, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAppStore } from '@/zustand/store';
-import lz from 'lz-string';
-import { playAudios } from '@/util/audioUtils';
-import JournalMode from './_components/JournalMode';
+import SettingBar from './_components/SettingBar';  // 设置栏组件
+import Chat from './_components/Chat';  // 聊天组件
+import HandsFreeMode from './_components/HandsFreeMode';  // 免提模式组件
+import TextMode from './_components/TextMode';  // 文本模式组件
+import HamburgerMenu from './_components/HamburgerMenu';  // 汉堡菜单组件
+import ShareButton from './_components/SettingBar/ShareButton';  // 分享按钮组件
+import TabButton from '@/components/TabButton';  // 选项卡按钮组件
+import Image from 'next/image';  // 图片组件
+import exitIcon from '@/assets/svgs/exit.svg';  // 退出图标
+import { BsChatRightText, BsTelephone } from 'react-icons/bs';  // 图标
+import { useEffect, useRef, useState } from 'react';  // React钩子
+import { useRouter, useSearchParams } from 'next/navigation';  // Next.js 路由和搜索参数钩子
+import { useAppStore } from '@/zustand/store';  // 应用状态管理钩子
+import lz from 'lz-string';  // 压缩和解压缩库
+import { playAudios } from '@/util/audioUtils';  // 音频播放实用工具
+import JournalMode from './_components/JournalMode';  // 日记模式组件
 
 export default function Conversation() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isTextMode, setIsTextMode] = useState(true);
-  const { isJournalMode, setIsJournalMode, resetJournal, resetSpeakersList } =
-    useAppStore();
-  const { character, getAudioList, setCharacter, clearChatContent } =
-    useAppStore();
-  // Websocket.
-  const { socketIsOpen, sendOverSocket, connectSocket, closeSocket } =
-    useAppStore();
-  // Media recorder.
-  const {
-    mediaRecorder,
-    connectMicrophone,
-    startRecording,
-    stopRecording,
-    closeMediaRecorder,
-  } = useAppStore();
-  // Audio player
-  const audioPlayerRef = useRef(null);
-  const audioQueueRef = useRef(useAppStore.getState().audioQueue);
-  const { isPlaying, setIsPlaying, popAudioQueueFront } = useAppStore();
-  const { setAudioPlayerRef, stopAudioPlayback } = useAppStore();
-  // Web RTC
-  const {
-    connectPeer,
-    closePeer,
-    incomingStreamDestination,
-    audioContext,
-    rtcConnectionEstablished,
-  } = useAppStore();
-  const { selectedMicrophone, selectedSpeaker } = useAppStore();
-  const { vadEvents, vadEventsCallback, disableVAD, enableVAD, closeVAD } =
-    useAppStore();
+  const router = useRouter();  // 路由钩子
+  const searchParams = useSearchParams();  // 获取URL参数钩子
+  const [isTextMode, setIsTextMode] = useState(true);  // 控制文本模式状态
+  const { isJournalMode, setIsJournalMode, resetJournal, resetSpeakersList } = useAppStore();  // 日记模式相关的状态和函数
+  const { character, getAudioList, setCharacter, clearChatContent } = useAppStore();  // 角色相关的状态和函数
+  
+  // WebSocket相关的状态和函数
+  const { socketIsOpen, sendOverSocket, connectSocket, closeSocket } = useAppStore();
+  
+  // 媒体录制相关的状态和函数
+  const { mediaRecorder, connectMicrophone, startRecording, stopRecording, closeMediaRecorder } = useAppStore();
+  
+  // 音频播放器相关
+  const audioPlayerRef = useRef(null);  // 音频播放器引用
+  const audioQueueRef = useRef(useAppStore.getState().audioQueue);  // 音频队列引用
+  const { isPlaying, setIsPlaying, popAudioQueueFront } = useAppStore();  // 音频播放状态和函数
+  const { setAudioPlayerRef, stopAudioPlayback } = useAppStore();  // 音频播放器引用设置和停止播放函数
+  
+  // WebRTC相关
+  const { connectPeer, closePeer, incomingStreamDestination, audioContext, rtcConnectionEstablished } = useAppStore();  // WebRTC相关状态和函数
+  const { selectedMicrophone, selectedSpeaker } = useAppStore();  // 选择的麦克风和扬声器
+  const { vadEvents, vadEventsCallback, disableVAD, enableVAD, closeVAD } = useAppStore();  // 语音活动检测（VAD）相关状态和函数
 
+  // 订阅音频队列的变化，当音频队列变化时更新引用
   useEffect(
-    () =>
-      useAppStore.subscribe(
-        state => (audioQueueRef.current = state.audioQueue)
-      ),
+    () => useAppStore.subscribe(state => (audioQueueRef.current = state.audioQueue)),
     []
   );
 
+  // 初始化角色信息和状态
   useEffect(() => {
     const characterString = searchParams.get('character');
-    const character = JSON.parse(
-      lz.decompressFromEncodedURIComponent(characterString)
-    );
-    setCharacter(character);
-    setIsJournalMode(false);
-    resetJournal();
-    resetSpeakersList();
+    const character = JSON.parse(lz.decompressFromEncodedURIComponent(characterString));  // 解压缩并解析角色信息
+    setCharacter(character);  // 设置角色信息
+    setIsJournalMode(false);  // 设置日记模式为关闭
+    resetJournal();  // 重置日记
+    resetSpeakersList();  // 重置扬声器列表
   }, []);
 
-  // Bind current audio player to state ref.
+  // 绑定音频播放器引用到状态
   useEffect(() => {
     setAudioPlayerRef(audioPlayerRef);
   }, []);
 
+  // 连接WebSocket
   useEffect(() => {
     connectSocket();
   }, [character]);
 
+  // 当麦克风选择变化时重新连接和初始化VAD
   useEffect(() => {
     if (mediaRecorder) {
-      closeMediaRecorder();
+      closeMediaRecorder();  // 关闭媒体录制器
     }
     if (rtcConnectionEstablished) {
-      closePeer();
+      closePeer();  // 关闭WebRTC连接
     }
-    getAudioList()
-      .then()
+    getAudioList()  // 获取音频列表
+      .then(() => connectPeer())  // 连接WebRTC
       .then(() => {
-        connectPeer().then(() => {
-          connectMicrophone();
-          initializeVAD();
-        });
+        connectMicrophone();  // 连接麦克风
+        initializeVAD();  // 初始化VAD
       });
   }, [selectedMicrophone]);
 
+  // 初始化语音活动检测(VAD)
   function initializeVAD() {
     if (vadEvents) {
-      closeVAD();
+      closeVAD();  // 关闭VAD
     }
     vadEventsCallback(
       () => {
-        stopAudioPlayback();
-        startRecording();
+        stopAudioPlayback();  // 停止音频播放
+        startRecording();  // 开始录音
       },
       () => {
-        // Stops recording and send interim audio clip to server.
+        // 停止录音并发送中间音频片段到服务器
         sendOverSocket('[&Speech]');
-        stopRecording();
+        stopRecording();  // 停止录音
       },
       () => {
-        sendOverSocket('[SpeechFinished]');
+        sendOverSocket('[SpeechFinished]');  // 发送语音结束信号到服务器
       }
     );
     if (!isTextMode && !disableMic) {
-      enableVAD();
+      enableVAD();  // 启用VAD
     }
   }
 
-  // Reconnects websocket on setting change.
-  const {
-    preferredLanguage,
-    selectedModel,
-  } = useAppStore();
+  // 重新连接WebSocket并初始化VAD
+  const { preferredLanguage, selectedModel } = useAppStore();
   useEffect(() => {
     if (!mediaRecorder || !socketIsOpen || !rtcConnectionEstablished) {
       return;
     }
-    closeSocket();
-    clearChatContent();
-    connectSocket();
-    initializeVAD();
-  }, [
-    preferredLanguage,
-    selectedModel,
-  ]);
+    closeSocket();  // 关闭WebSocket
+    clearChatContent();  // 清空聊天内容
+    connectSocket();  // 重新连接WebSocket
+    initializeVAD();  // 初始化VAD
+  }, [preferredLanguage, selectedModel]);
 
+  // 设置音频输出设备
   useEffect(() => {
-    // The chrome on android seems to have problems selecting devices.
+    // 在Android设备上选择音频设备可能会有问题
     if (typeof audioPlayerRef.current.setSinkId === 'function') {
       audioPlayerRef.current.setSinkId(selectedSpeaker.values().next().value);
     }
   }, [selectedSpeaker]);
 
-  // Audio Playback
+  // 播放音频队列
   useEffect(() => {
-    if (audioContext, !isPlaying && audioQueueRef.current?.length > 0) {
+    if (audioContext && !isPlaying && audioQueueRef.current?.length > 0) {
       playAudios(
         audioContext,
         audioPlayerRef,
@@ -165,74 +147,70 @@ export default function Conversation() {
 
   const { isMute, setIsMute, disableMic, setDisableMic } = useAppStore();
 
+  // 切换到免提模式
   function handsFreeMode() {
     setIsTextMode(false);
     if (!disableMic) {
-      enableVAD();
+      enableVAD();  // 启用VAD
     }
   }
 
+  // 切换到文本模式
   function textMode() {
     setIsTextMode(true);
-    disableVAD();
+    disableVAD();  // 禁用VAD
   }
 
+  // 切换静音状态
   function toggleMute() {
     if (!isMute) {
-      stopAudioPlayback();
+      stopAudioPlayback();  // 停止音频播放
     }
-    setIsMute(!isMute);
+    setIsMute(!isMute);  // 切换静音状态
   }
 
+  // 切换麦克风启用状态
   function handleMic() {
     if (disableMic) {
-      enableVAD();
+      enableVAD();  // 启用VAD
     } else {
-      disableVAD();
+      disableVAD();  // 禁用VAD
     }
-    setDisableMic(!disableMic);
+    setDisableMic(!disableMic);  // 切换麦克风启用状态
   }
 
+  // 清理状态
   const cleanUpStates = () => {
-    disableVAD();
-    closeVAD();
-    stopAudioPlayback();
-    closeMediaRecorder();
-    closePeer();
-    closeSocket();
-    clearChatContent();
-    setCharacter({});
+    disableVAD();  // 禁用VAD
+    closeVAD();  // 关闭VAD
+    stopAudioPlayback();  // 停止音频播放
+    closeMediaRecorder();  // 关闭媒体录制器
+    closePeer();  // 关闭WebRTC连接
+    closeSocket();  // 关闭WebSocket
+    clearChatContent();  // 清空聊天内容
+    setCharacter({});  // 清空角色信息
   };
 
-  // For journal mode
+  // 日记模式
   useEffect(() => {
     if (isJournalMode) {
-      enableVAD();
+      enableVAD();  // 启用VAD
     } else {
-      disableVAD();
+      disableVAD();  // 禁用VAD
     }
   }, [isJournalMode]);
 
   return (
     <div className="relative h-screen conversation_container">
-      <audio
-        ref={audioPlayerRef}
-        className="audio-player"
-      >
-        <source
-          src=""
-          type="audio/mp3"
-        />
+      <audio ref={audioPlayerRef} className="audio-player">
+        <source src="" type="audio/mp3" />
       </audio>
       {!isJournalMode ? (
         <>
           <div className="fixed top-0 w-full bg-background z-10">
             <div className="grid grid-cols-4 gap-5 pt-4 md:pt-5 items-center">
               <div>
-                <Tooltip
-                  content="Exit"
-                  placement="bottom"
-                >
+                <Tooltip content="Exit" placement="bottom">
                   <Button
                     isBlock
                     isIconOnly
@@ -240,14 +218,10 @@ export default function Conversation() {
                     className="hover:opacity-80 h-8 w-8 md:h-12 md:w-12 ml-5 mt-1 bg-button"
                     onPress={() => {
                       router.push('/');
-                      cleanUpStates();
+                      cleanUpStates();  // 清理状态
                     }}
                   >
-                    <Image
-                      priority
-                      src={exitIcon}
-                      alt="exit"
-                    />
+                    <Image priority src={exitIcon} alt="exit" />
                   </Button>
                 </Tooltip>
               </div>

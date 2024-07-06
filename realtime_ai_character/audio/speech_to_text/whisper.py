@@ -59,14 +59,13 @@ class Whisper(Singleton, SpeechToText):
 
     @timed
     def transcribe(self, audio_bytes, platform, prompt="", language="en-US", suppress_tokens=[-1]):
-        logger.info("Transcribing audio...")
+        logger.info("whisper Transcribing audio...")
         if platform == "web":
             audio = self._convert_webm_to_wav(audio_bytes, self.use == "local")
         elif platform == "twilio":
             audio = self._ulaw_to_wav(audio_bytes, self.use == "local")
         else:
             audio = self._convert_bytes_to_wav(audio_bytes, self.use == "local")
-
         if self.use == "local":
             return self._transcribe(audio, prompt, suppress_tokens=suppress_tokens)
         elif self.use == "api":

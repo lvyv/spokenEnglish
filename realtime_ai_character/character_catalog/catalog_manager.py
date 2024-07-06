@@ -33,7 +33,7 @@ class CatalogManager(Singleton):
         else:
             self.db = get_chroma(embedding=False)
             overwrite = False
-            logger.warning("OVERWRITE_CHROMA disabled due to OPENAI_API_KEY not set")
+            logger.info("OVERWRITE_CHROMA disabled due to OPENAI_API_KEY not set")
         self.sql_db = next(get_db())
         self.sql_load_interval = 30
         self.sql_load_lock = rwlock.RWLockFair()

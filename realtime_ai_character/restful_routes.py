@@ -52,9 +52,6 @@ MAX_FILE_UPLOADS = 5
 
 async def get_current_user(request: Request):
     """Returns the current user if the request is authenticated, otherwise None."""
-    usr = os.getenv('USER_IGNORE')
-    if usr:
-        return usr
     if os.getenv("USE_AUTH") == "true" and "Authorization" in request.headers:
         # Extracts the token from the Authorization header
         tokens = request.headers.get("Authorization", "").split("Bearer ")
@@ -300,8 +297,6 @@ async def generate_audio(text: str, tts: Optional[str] = None, user=Depends(get_
             detail="Text to speech engine not found",
         )
     audio_bytes = await tts_service.generate_audio(text)
-    with open('test.mp3', 'wb') as f:
-        f.write(audio_bytes)
     # save audio to a file on GCS
     storage_client = storage.Client()
     bucket_name = os.environ.get("GCP_STORAGE_BUCKET_NAME")

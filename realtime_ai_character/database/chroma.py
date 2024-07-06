@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 def get_chroma(embedding: bool = True):
     if embedding:
-        openai_api_key = os.getenv("OPENAI_API_KEY")
+        openai_api_key = os.getenv("OPENAI_API_KEY  ")
         if not openai_api_key:
             raise Exception("OPENAI_API_KEY is required to generate embeddings")
         if os.getenv("OPENAI_API_TYPE") == "azure":

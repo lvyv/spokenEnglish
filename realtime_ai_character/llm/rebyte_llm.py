@@ -21,7 +21,7 @@ class RebyteLlm(LLM):
     def __init__(self):
         self.rebyte_api_key = os.getenv("REBYTE_API_KEY", "")
 
-        self.chat_rebyte = RebyteEndpoint(
+        self. chat_rebyte = RebyteEndpoint(
             rebyte_api_key=self.rebyte_api_key, client=None, streaming=True
         )
         self.config = {}

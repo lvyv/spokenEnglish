@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    #inputContainer {
+      margin-bottom: 20px;
+    }
+
+    #audioContainer {
+      margin-top: 20px;
+    }
+  </style>
+  <!-- import the webpage's javascript file -->
+
+  <script>
+
+    let submitButton, audioPlayer, audioWorkletNode;
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      submitButton = document.getElementById('submitButton');
+      submitButton.addEventListener('click', function () {
+        const userInput = document.getElementById('userInput').value;
+        document.getElementById('displayText').innerText = `You entered: ${userInput}`;
+        // Create or resume AudioContext after user gesture
+        if (!window.audioContext) {
+          window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          setupWebSocketAndAudio();
+        } else if (window.audioContext.state === 'suspended') {
+          window.audioContext.resume();
+        }
+
+
+      });
+      audioPlayer = document.getElementById('audioPlayer');
+
+
+    });
+
+
+    async function setupWebSocketAndAudio() {
+      const audioContext = window.audioContext;
+
+      await audioContext.resume();
+      // Load the audio worklet processor script
+      await audioContext.audioWorklet.addModule('audio-processor.js');
+
+      const audioWorkletNode = new AudioWorkletNode(audioContext, 'audio-processor');
+
+      audioWorkletNode.connect(audioContext.destination);
+
+
+
+
+
+      const ws = new WebSocket('ws://127.0.0.1:18080/ws/harris1226?llm_model=gemini');
+      ws.onopen = function (event) {
+        console.log('WebSocket connection opened');
+        // Send a JSON message to the server
+        const message = {
+          id: 'harris1226',
+          message: 'Aloha!'
+        };
+        ws.send(JSON.stringify(message));
+      };
+      // ... (rest of the code remains the same)
+      // 当收到服务器发送的消息时触发
+      ws.onmessage = function (event) {
+        const msg = event.data;
+        console.log("收到消息: " + msg);
+        const hint = 'Select your character by entering the corresponding number:';
+        const greeting = 'Hi, my friend, what brings you here today?';
+        if (typeof msg === 'string') {
+          // 文本消息
+          if (msg.indexOf(hint) !== -1)
+            ws.send('7');
+          if (msg.indexOf(hint) !== -1)
+            ws.send('Hello, would you please help me to improve my spoken English?');
+        } else {
+          // 语音消息
+          const reader = new FileReader();
+
+          reader.addEventListener('load', () => {
+            const arrayBuffer = reader.result;
+            console.log('Received Blob data as ArrayBuffer:', arrayBuffer);
+
+            // const sampleRate = 44100; // 采样率
+            // const duration = 10; // 持续时间，秒
+
+
+
+            const sampleRate = 44100; // 采样率
+            const frequency = 440; // 频率，A4音符
+            const duration = 3; // 持续时间，秒
+            // const samples = sampleRate * duration;
+            // const sineWave = new Float32Array(samples);
+            // for (let i = 0; i < samples; i++) {
+            //   sineWave[i] = 100 * Math.sin(2 * Math.PI * frequency * i / sampleRate);
+            // }
+
+            // audioWorkletNode.port.postMessage(sineWave.buffer);
+
+            function generateSineWave(frequency, duration, sampleRate) {
+              const samples = sampleRate * duration;
+              const sineWave = new Float32Array(samples);
+              for (let i = 0; i < samples; i++) {
+                sineWave[i] = 100 * Math.sin(2 * Math.PI * frequency * i / sampleRate);
+              }
+              return sineWave;
+            }
+
+            const sineWave1 = generateSineWave(440, duration, sampleRate); // 频率 440Hz
+            const sineWave2 = generateSineWave(880, duration, sampleRate); // 频率 880Hz
+
+            // 将两个正弦波数据依次发送到 AudioWorkletNode
+            audioWorkletNode.port.postMessage(sineWave1.buffer);
+            setTimeout(() => {
+              audioWorkletNode.port.postMessage(sineWave2.buffer);
+            }, duration * 1000); // 在第一个音播放结束后发送第二个音
+
+
+            // // audioWorkletNode.port.postMessage({
+            // //   type: 'audio',
+            // //   audioBuffer: sineWave.buffer    //arrayBuffer
+            // // });
+
+          });
+
+          reader.readAsArrayBuffer(msg);
+
+
+        }
+      };
+
+      // 当连接关闭时触发
+      ws.onclose = function (event) {
+        console.log("WebSocket连接已关闭");
+      };
+
+      // 当发生错误时触发
+      ws.onerror = function (event) {
+        console.error("WebSocket错误发生: " + event);
+      };
+    }
+  </script>
+</head>
+
+<body>
+  <h1>调试前端</h1>
+  <div id="inputContainer">
+    <label for="userInput">Enter Text:</label>
+    <input type="text" id="userInput">
+    <button id="submitButton">Submit</button>
+    <p id="displayText"></p>
+  </div>
+  <div id="audioContainer">
+    <audio id="audioPlayer" controls></audio>
+  </div>
+
+</body>
+
+</html>

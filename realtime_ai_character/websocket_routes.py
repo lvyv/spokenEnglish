@@ -139,7 +139,7 @@ async def websocket_endpoint(
         return
     logger.info(f"User #{user_id} is authorized to access session {session_id}")
 
-    # llm = get_llm(model=llm_model)
+    llm = get_llm(model=llm_model)
     await manager.connect(websocket)
     try:
         main_task = asyncio.create_task(
@@ -148,7 +148,7 @@ async def websocket_endpoint(
                 session_id,
                 user_id,
                 db,
-                # llm,
+                llm,
                 catalog_manager,
                 character_id,
                 platform,
@@ -171,7 +171,7 @@ async def handle_receive(
     session_id: str,
     user_id: str,
     db: Session,
-    # llm: LLM,
+    llm: LLM,
     catalog_manager: CatalogManager,
     character_id: str,
     platform: str,

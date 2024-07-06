@@ -39,6 +39,9 @@ def get_llm(model="gpt-3.5-turbo-16k") -> LLM:
         from realtime_ai_character.llm.rebyte_llm import RebyteLlm
 
         return RebyteLlm()
+    elif "gemini" in model:
+        from realtime_ai_character.llm.gemini_llm import GeminiLlm
+        return GeminiLlm()
     else:
         raise ValueError(f"Invalid llm model: {model}")
 

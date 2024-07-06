@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>1.简单播放</title>
+</head>
+
+<body>
+  <audio id="aplayer" src="assets/outfoxing.mp3" crossorigin="anonymous"></audio>
+  <button id="playBtn">播放</button>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const audioElement = document.getElementById("aplayer");
+      const playBtn = document.getElementById("playBtn");
+      playBtn.addEventListener('click', () => {
+        audioElement.play();
+      });
+    });
+  </script>
+</body>
+
+</html>

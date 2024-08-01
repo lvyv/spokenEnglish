@@ -90,5 +90,5 @@ class GeminiLlm(LLM):
         logger.info(f"Response: {response}")
         await callback.on_new_token(response.text)
 
-        # return response.generations[0][0].text
+        await audioCallback.on_llm_new_token(response.text)
         return response

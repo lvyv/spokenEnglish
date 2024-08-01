@@ -2,10 +2,6 @@
 import os
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.schema import BaseMessage, HumanMessage
-# from langchain.utilities import asyncio
-import asyncio
-
-from realtime_ai_character.audio.text_to_speech.edge_tts import EdgeTTS
 from realtime_ai_character.llm.base import (
     AsyncCallbackAudioHandler,
     AsyncCallbackTextHandler,
@@ -95,15 +91,4 @@ class GeminiLlm(LLM):
         await callback.on_new_token(response.text)
 
         await audioCallback.on_llm_new_token(response.text)
-        ### 添加的内容开始 ###
-        # TTS integration
-        # edge_tts = EdgeTTS()
-        # tts_event = asyncio.Event()
-        # websocket = kwargs.get("websocket")
-        #
-        # if websocket:
-        #     await edge_tts.stream(response.text, websocket, tts_event, voice_id=character.voice_id)
-        ### 添加的内容结束 ###
-
-        # return response.generations[0][0].text
         return response

@@ -1,3 +1,4 @@
+#
 import os
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.schema import BaseMessage, HumanMessage
@@ -14,12 +15,20 @@ import google.generativeai  as genai
 # 导入 RebyteEndpoint 类
 from rebyte_langchain.rebyte_langchain import RebyteEndpoint
 
+<<<<<<< HEAD
 # 设置环境变量，将7890改为了15732
 proxy_server = '127.0.0.1'
 proxy_port = '15732'  # 更新端口号
 os.environ['http_proxy'] = f'http://{proxy_server}:{proxy_port}'
 os.environ['https_proxy'] = f'http://{proxy_server}:{proxy_port}'
 
+=======
+# 设置环境变量
+proxy_server = '127.0.0.1'
+proxy_port = '7890'
+os.environ['http_proxy'] = f'http://{proxy_server}:{proxy_port}'
+os.environ['https_proxy'] = f'http://{proxy_server}:{proxy_port}'
+>>>>>>> a5970e74e179e9e73a001b2fa45db89d07f7162e
 
 logger = get_logger(__name__)
 
@@ -89,7 +98,12 @@ class GeminiLlm(LLM):
         response = self.send_message_to_gemini(user_input)
         logger.info(f"Response: {response}")
         await callback.on_new_token(response.text)
+<<<<<<< HEAD
         await audioCallback.on_llm_new_token(response.text)
 
         # return response.generations[0][0].text
+=======
+
+        await audioCallback.on_llm_new_token(response.text)
+>>>>>>> a5970e74e179e9e73a001b2fa45db89d07f7162e
         return response

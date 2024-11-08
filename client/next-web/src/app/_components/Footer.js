@@ -4,44 +4,41 @@ import { Link } from '@nextui-org/link';
 
 export default function Footer() {
   return (
-    <footer className='pt-10'>
+    <footer className='pt-10 bg-white text-black'>
       <div className='flex justify-center py-4'>
         <Link
-          className='basis-14 flex justify-center mr-5'
+          className='basis-14 flex justify-center mr-5 text-blue-500'
           href='https://github.com/Shaunwei/RealChar'
           target='_blank'
           rel='noreferrer'
           aria-label='link to Github'
-          color='foreground'
         >
           <VscGithub size={24} />
         </Link>
         <Link
-          className='basis-14 flex justify-center mr-5'
+          className='basis-14 flex justify-center mr-5 text-blue-500'
           href='/join-discord'
           target='_blank'
           rel='noreferrer'
           aria-label='link to Discord'
-          color='foreground'
         >
           <FaDiscord size={24} />
         </Link>
         <Link
-          className='basis-14 flex justify-center'
+          className='basis-14 flex justify-center text-blue-500'
           href='https://twitter.com/agishaun'
           target='_blank'
           rel='noreferrer'
           aria-label='link to Twitter'
-          color='foreground'
         >
           <FaTwitter size={24} />
         </Link>
       </div>
-      <p className='copyright text-xs text-center my-7'>
-        Copyright © 2023 RealChar. All rights reserved. Any AI character&apos;s statements are
-        fictional and don&apos;t represent actual beliefs or opinions. Ver:{' '}
+      <p className='copyright text-sm text-center my-7'>
+        版权所有 © 2023 VerbaVista。保留所有权利。任何 AI 角色的陈述均为虚构，不代表实际信仰或观点。版本: {' '}
         {process.env.NEXT_PUBLIC_RC_BUILD_NUMBER}
       </p>
+
     </footer>
   );
 }

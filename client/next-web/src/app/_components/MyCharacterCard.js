@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardBody,
@@ -17,16 +18,16 @@ export default function CharacterCard({
   const router = useRouter();
 
   return (
-    <Card className="p-2.5">
-      <CardBody className="p-0 text-center flex-row gap-2 md:flex-col">
+    <Card className="p-1 max-w-xs h-[200px] bg-gray-200 text-black]"> 
+      <CardBody className="p-1 text-center flex flex-col gap-1">
         <Avatar
           radius="sm"
           src={character.image_url}
-          className="w-20 h-20 md:w-44 md:h-44 md:mx-auto mt-2"
+          className="w-8 h-8 md:w-16 md:h-16 mx-auto mt-1"
         />
-        <div className="grow md:ml-0">
-          <p className="name text-base text-center h-12 flex flex-row justify-center items-center"><span>{character.name}</span></p>
-          <div className="flex justify-center mt-1 relative h-10">
+        <div className="grow">
+          <p className="name text-xs text-center h-8 flex flex-row justify-center items-center"><span>{character.name}</span></p> 
+          <div className="flex justify-center mt-1 relative h-5"> {/* 进一步缩小高度 */}
             <Link
               href={{
                 pathname: '/edit',
@@ -34,24 +35,27 @@ export default function CharacterCard({
               }}
               as={NextLink}
               underline="hover"
-              className="text-real-blue-500">
-              <BiEdit size="1.2em" className="mr-1"/>
+              className="text-black flex items-center text-xs">
+              <BiEdit size="0.75em" className="mr-1"/>
               Edit details
             </Link>
           </div>
         </div>
       </CardBody>
-      <CardFooter className="mt-5">
+      <CardFooter className="mt-1"> {/* 减少间距 */}
         <Button
-          className="w-full font-light bg-default/40"
+          className="w-full font-light bg-default/40 hover:opacity-80 text-xs text-black"
           onPress={() => {
             const compressedCharacter = lz.compressToEncodedURIComponent(
               JSON.stringify(character)
             );
             router.push(`/conversation?character=${compressedCharacter}`);
           }}
-        >Chat with me</Button>
+        >
+          Chat with me
+        </Button>
       </CardFooter>
     </Card>
   );
 }
+

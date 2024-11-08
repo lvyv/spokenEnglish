@@ -3,7 +3,7 @@ import Footer from '../_components/Footer';
 export default function Privacy() {
   return (
     <>
-      <Header />
+      <Header /> //展示 RealChar 的隐私政策页面。
       <div className="py-5 px-4 flex flex-col gap-3 md:w-unit-9xl md:mx-auto md:gap-5 lg:w-[892px] lg:gap-8">
         <h1 className="text-2xl font-medium">Privacy Notice for RealChar</h1>
         <p>

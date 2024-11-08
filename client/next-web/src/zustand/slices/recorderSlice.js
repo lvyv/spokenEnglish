@@ -1,133 +1,115 @@
-import hark from 'hark'; // 导入 hark 库，用于语音活动检测
+import hark from 'hark';
 
-export const createRecorderSlice = (set, get) => ({
-  // 记录录音状态
+export const createRecorderSlice = (set, get) => ({   //实现一个录音功能
   isRecording: false,
   setIsRecording: v => {
-    set({ isRecording: v }); // 设置录音状态
+    set({ isRecording: v });
   },
-  mediaRecorder: null, // 媒体录音对象
-
-  // 连接麦克风
-  connectMicrophone: () => {
-    const deviceId = get().selectedMicrophone.values().next().value; // 获取选定的麦克风设备ID
-    if (get().mediaRecorder) return; // 如果已有录音器，直接返回
+  mediaRecorder: null,
+  connectMicrophone: () => {  //连接麦克风
+    const deviceId = get().selectedMicrophone.values().next().value;
+    if (get().mediaRecorder) return;
     navigator.mediaDevices
       .getUserMedia({
         audio: {
-          deviceId: deviceId ? deviceId : undefined, // 获取音频流
+          deviceId: deviceId ? deviceId : undefined,
         },
       })
       .then(stream => {
         let micStreamSourceNode =
-          get().audioContext.createMediaStreamSource(stream); // 创建媒体流源节点
-        let gainNode = get().audioContext.createGain(); // 创建增益节点
-        gainNode.gain.setValueAtTime(1.5, get().audioContext.currentTime); // 设置增益值
-        let delayNode = get().audioContext.createDelay(0.5); // 创建延迟节点
-        delayNode.delayTime.value = 0.1; // 设置延迟时间
+          get().audioContext.createMediaStreamSource(stream);
+        let gainNode = get().audioContext.createGain();
+        gainNode.gain.setValueAtTime(1.5, get().audioContext.currentTime);
+        let delayNode = get().audioContext.createDelay(0.5);
+        delayNode.delayTime.value = 0.1;
         let micStreamDestinationNode =
-          get().audioContext.createMediaStreamDestination(); // 创建媒体流目标节点
-        let mediaRecorder = new MediaRecorder(micStreamDestinationNode.stream); // 创建媒体录音器
+          get().audioContext.createMediaStreamDestination();
+        let mediaRecorder = new MediaRecorder(micStreamDestinationNode.stream);
         micStreamSourceNode
           .connect(gainNode)
           .connect(delayNode)
-          .connect(micStreamDestinationNode); // 连接音频节点
-
-        // 临时解决方案，用于模拟iOS 16中停止事件行为，当前iOS 16停止事件不会触发
+          .connect(micStreamDestinationNode);
+        // Temporary workaround for mimic stop event behavior, as for now on iOS 16 stop event doesn't fire.
         mediaRecorder.ondataavailable = event => {
-          let blob = new Blob([event.data], { type: 'audio/webm' }); // 创建Blob对象
-          get().sendOverSocket(blob); // 通过Socket发送音频数据
+          let blob = new Blob([event.data], { type: 'audio/webm' });
+          get().sendOverSocket(blob);
         };
         set({
-          mediaRecorder: mediaRecorder, // 设置媒体录音器
+          mediaRecorder: mediaRecorder,
         });
       })
       .catch(function (err) {
-        console.log('An error occurred: ' + err); // 打印错误信息
+        console.log('An error occurred: ' + err);
         if (err.name === 'NotAllowedError') {
           alert(
             'Permission Denied: Please grant permission to access the microphone and refresh the website to try again!'
-          ); // 提示用户麦克风权限被拒绝
+          );
         } else if (err.name === 'NotFoundError') {
           alert(
             'No Device Found: Please check your microphone device and refresh the website to try again.'
-          ); // 提示用户麦克风设备未找到
+          );
         }
-        get().closeMediaRecorder(); // 关闭媒体录音器
+        get().closeMediaRecorder();
         // TODO: Route to / ?
       });
   },
-
-  // 开始录音
   startRecording: () => {
     console.log('start recording');
-    get().mediaRecorder?.start(); // 启动媒体录音器
-    get().setIsRecording(true); // 设置录音状态为true
+    get().mediaRecorder?.start();
+    get().setIsRecording(true);
   },
 
-  // 停止录音
   stopRecording: () => {
     console.log('stop recording');
-    get().mediaRecorder?.stop(); // 停止媒体录音器
-    get().setIsRecording(false); // 设置录音状态为false
+    get().mediaRecorder?.stop();
+    get().setIsRecording(false);
   },
-
-  // 关闭媒体录音器
   closeMediaRecorder: () => {
-    get().stopRecording(); // 停止录音
+    get().stopRecording();
     set({
-      mediaRecorder: null, // 清空媒体录音器
+      mediaRecorder: null,
     });
   },
-
-  // 语音活动检测（VAD）
+  // VAD
   vadEvents: null,
-  isSpeaking: false, // 是否正在说话
-  speakingMaxGap: 500, // 在ms中的最大间隔
+  isSpeaking: false,
+  speakingMaxGap: 500, //in ms
   delayedSpeakingTimeoutID: null,
-
-  // VAD事件回调
-  vadEventsCallback: (
+  vadEventsCallback: (  //语音活动检测（VAD）。
     voiceStartCallback,
     voiceInterimCallback,
     voiceEndCallback
   ) => {
-    let vadEvents = hark(get().micStream, { interval: 20, threshold: -50 }); // 初始化VAD
+    let vadEvents = hark(get().micStream, { interval: 20, threshold: -50 });
     vadEvents.on('speaking', () => {
-      voiceStartCallback(); // 调用语音开始回调
+      voiceStartCallback();
       if (!get().isSpeaking) {
-        set({ isSpeaking: true }); // 设置正在说话状态
+        set({ isSpeaking: true });
       } else {
-        clearTimeout(get().delayedSpeakingTimeoutID); // 清除延迟的说话超时ID
+        clearTimeout(get().delayedSpeakingTimeoutID);
       }
     });
     vadEvents.on('stopped_speaking', () => {
       if (get().isSpeaking) {
         const task = setTimeout(() => {
-          voiceEndCallback(); // 调用语音结束回调
-          set({ isSpeaking: false }); // 设置不在说话状态
-        }, get().speakingMaxGap); // 延迟间隔
-        set({ delayedSpeakingTimeoutID: task }); // 设置延迟的说话超时ID
-        voiceInterimCallback(); // 调用语音中间回调
+          voiceEndCallback();
+          set({ isSpeaking: false });
+        }, get().speakingMaxGap);
+        set({ delayedSpeakingTimeoutID: task });
+        voiceInterimCallback();
       }
     });
-    vadEvents.suspend(); // 暂停VAD
-    set({ vadEvents: vadEvents }); // 设置VAD事件
+    vadEvents.suspend();
+    set({ vadEvents: vadEvents });
   },
-
-  // 启用VAD
   enableVAD: () => {
-    get().vadEvents?.resume(); // 恢复VAD
+    get().vadEvents?.resume();
   },
-
-  // 禁用VAD
   disableVAD: () => {
-    get().vadEvents?.suspend(); // 暂停VAD
+    get().vadEvents?.suspend();
   },
-
-  // 关闭VAD
   closeVAD: () => {
-    get().vadEvents?.stop(); // 停止VAD
-    set({ vadEvents: null, isSpeaking: false }); // 清空VAD事件，设置不在说话状态
+    get().vadEvents?.stop();
+    set({ vadEvents: null, isSpeaking: false });
   },
 });

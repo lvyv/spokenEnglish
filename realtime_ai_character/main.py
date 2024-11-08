@@ -12,7 +12,8 @@ from realtime_ai_character.twilio.websocket import twilio_router
 from realtime_ai_character.utils import ConnectionManager
 from realtime_ai_character.websocket_routes import router as websocket_router
 from realtime_ai_character.utils import Character  # 测试用
-
+import os#添
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"#添
 
 app = FastAPI()
 
@@ -41,6 +42,6 @@ warnings.filterwarnings("ignore", module="whisper")
 if __name__ == '__main__':
     """Test app.main:app"""
     uvicorn.run('main:app',  # noqa 标准用法
-            host='0.0.0.0',
+            host='127.0.0.1',
             port=18080,
             )

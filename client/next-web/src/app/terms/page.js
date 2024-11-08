@@ -4,7 +4,7 @@ import Footer from '../_components/Footer';
 export default function TermsOfService() {
   return (
     <>
-      <Header />
+      <Header />  //渲染 RealChar 的服务条款页面。
       <div className="py-5 px-4 flex flex-col gap-3 md:w-unit-9xl md:mx-auto md:gap-5 lg:w-[892px] lg:gap-8">
         <h1 className="text-2xl font-medium">Terms of Service for RealChar</h1>
         <p>

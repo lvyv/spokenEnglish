@@ -1,29 +1,3 @@
-"""
-
-这段代码实现了一个基于 WebSocket 的客户端，用于与一个远程服务进行语音和文本交互。以下是其功能总结：
-
-引入了多个 Python 模块，包括用于语音识别、音频处理和 WebSocket 通信的模块。
-定义了一个 AudioPlayer 类，用于播放音频，并提供了开始、停止播放的方法。
-定义了一个 get_input_device_id 函数，用于获取音频输入设备的 ID。
-实现了多个异步函数，包括处理音频、处理文本消息和接收消息的函数。
-实现了一个 select_model 函数，用于选择语言模型。
-实现了一个 start_client 函数，用于启动客户端，并通过 WebSocket 连接到远程服务器。
-实现了一个 main 函数，用于启动主程序，并通过命令行参数指定远程服务器的 URL。
-在 __main__ 部分，通过命令行参数获取远程服务器的 URL，并调用 main 函数启动客户端。
-总的来说，这段代码实现了一个简单的 WebSocket 客户端，用于与远程服务器进行语音和文本交互。
-
-要启用前端的语音识别功能，您需要确保以下部分可以正常运行：
-
-pyaudio 和 speech_recognition 库已正确安装。
-您的系统具有可用的音频输入设备，并且 get_input_device_id 函数可以正确获取设备 ID。
-可以与远程服务器建立 WebSocket 连接。
-handle_audio 函数能够正确地从麦克风捕获音频，并将其发送到服务器。
-服务器能够正确地处理接收到的音频数据，并进行语音识别。
-通过命令行参数传递远程服务器的 URL。
-确保您的系统配置和网络连接允许您与远程服务器进行通信，并根据需要调整代码中的设置。
-"""
-
-
 import os
 import queue
 import asyncio
@@ -46,14 +20,11 @@ from pydub import AudioSegment
 from simpleaudio import WaveObject
 
 load_dotenv()
-
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
-
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-
 
 class AudioPlayer:
     def __init__(self):
@@ -244,4 +215,3 @@ async def main(url):
 if __name__ == "__main__":
     url = sys.argv[1] if len(sys.argv) > 1 else 'localhost:8000'
     asyncio.run(main(url))
-

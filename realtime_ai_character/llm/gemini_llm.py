@@ -1,6 +1,7 @@
 import os
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.schema import BaseMessage, HumanMessage
+from realtime_ai_character.database.chroma import get_chroma
 from realtime_ai_character.llm.base import (
     AsyncCallbackAudioHandler,
     AsyncCallbackTextHandler,
@@ -9,17 +10,13 @@ from realtime_ai_character.llm.base import (
 from realtime_ai_character.logger import get_logger
 from realtime_ai_character.utils import Character, timed
 from typing import Optional
-import google.generativeai  as genai
+import google.generativeai as genai
+import asyncio
 
-# 导入 RebyteEndpoint 类
-from rebyte_langchain.rebyte_langchain import RebyteEndpoint
-
-# 设置环境变量，将7890改为了15732
 proxy_server = '127.0.0.1'
-proxy_port = '15732'  # 更新端口号
+proxy_port = '7890'  # 更新端口号
 os.environ['http_proxy'] = f'http://{proxy_server}:{proxy_port}'
 os.environ['https_proxy'] = f'http://{proxy_server}:{proxy_port}'
-
 
 logger = get_logger(__name__)
 
@@ -31,27 +28,17 @@ class GeminiLlm(LLM):
 
         genai.configure(api_key=self.gemini_api_key)
         self.model = genai.GenerativeModel('gemini-1.5-flash')
-        self.chat = None
-
         self.config = {}
+        self.db = get_chroma()
 
     def get_config(self):
         return self.config
 
-    def _set_character_config(self, character: Character):
-        self.chat_rebyte.project_id = character.rebyte_api_project_id
-        self.chat_rebyte.agent_id = character.rebyte_api_agent_id
-        if character.rebyte_api_version is not None:
-            self.chat_rebyte.version = character.rebyte_api_version
-        pass
+    async def async_generate_content(self, user_input):
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(None, self.model.generate_content, user_input)
+        return response
 
-    def _set_user_config(self, user_id: str):
-        # self.chat_rebyte.session_id = user_id
-        pass
-
-    def send_message_to_gemini(self, user_input):
-        resp = self.model.generate_content(user_input)
-        return resp
 
     @timed
     async def achat(
@@ -66,30 +53,43 @@ class GeminiLlm(LLM):
             *args,
             **kwargs,
     ) -> str:
-        # 1. Add user input to history
-        # delete the first system message in history. just use the system prompt in rebyte platform
-        # history.pop(0)
-        #
-        # history.append(HumanMessage(content=user_input))
-        # # 2. Generate response
-        # # set project_id and agent_id for character
-        # self._set_character_config(character=character)
-        # # set session_id for user
-        # self._set_user_config(user_id)
-        #
+
+        all_text = ""
+        for message in history:
+            all_text += message.content + "\n"
+
+        context = self._generate_context(user_input, character)
+
+        # 2. Add user input to history
+        history.append(
+            HumanMessage(
+                content=character.llm_user_prompt.format(context=context, query=user_input)
+            )
+        )
+
         callbacks = [callback, StreamingStdOutCallbackHandler()]
         if audioCallback is not None:
             callbacks.append(audioCallback)
-        # response = await self.chat_rebyte.agenerate(
-        #     [history],
-        #     callbacks=callbacks,
-        #     metadata=metadata,
-        # )
 
-        response = self.send_message_to_gemini(user_input)
+        # 调用正确的方法来生成内容
+        try:
+            response = await self.async_generate_content(all_text)
+        except Exception as e:
+            print(f"生成内容时出错: {e}")
+
         logger.info(f"Response: {response}")
-        await callback.on_new_token(response.text)
-        await audioCallback.on_llm_new_token(response.text)
 
-        # return response.generations[0][0].text
-        return response
+        await callback.on_new_token(response.text)
+        # await callback.on_llm_end(response.text)
+        if audioCallback:
+            await audioCallback.on_llm_new_token(response.text)
+
+        return response.text
+
+    def _generate_context(self, query, character: Character) -> str:
+        docs = self.db.similarity_search(query)
+        docs = [d for d in docs if d.metadata["character_name"] == character.name]
+        logger.info(f"Found {len(docs)} documents")
+        context = "\n".join([d.page_content for d in docs])
+        return context
+

@@ -1,0 +1,26 @@
+/* styles/scrollbar.css */
+
+/* 隐藏滚动条 */
+.scrollbar-hidden {
+    overflow-y: scroll; /* 允许垂直滚动 */
+  }
+  
+  /* 仅隐藏滚动条的滑块 */
+  .scrollbar-hidden::-webkit-scrollbar {
+    width: 0; /* 隐藏滑块 */
+  }
+  
+  .scrollbar-hidden::-webkit-scrollbar-thumb {
+    background: transparent; /* 设置为透明 */
+  }
+  
+  .scrollbar-hidden::-webkit-scrollbar-track {
+    background: transparent; /* 设置为透明 */
+  }
+  
+  /* 对于 Firefox */
+  .scrollbar-hidden {
+    scrollbar-width: thin; /* 隐藏的滑块宽度 */
+    scrollbar-color: transparent transparent; /* 滚动条和滑块都为透明 */
+  }
+  

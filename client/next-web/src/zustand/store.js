@@ -9,6 +9,8 @@ import { createCharacterSlice } from '@/zustand/slices/characterSlice';
 import { createJournalSlice } from '@/zustand/slices/journalSlice';
 import { createCommandSlice } from '@/zustand/slices/commandSlice';
 import { createNavigationSlice } from '@/zustand/slices/navigationSlice';
+import { createAudioSlice } from '@/zustand/slices/audioSlice';  
+
 
 export const useAppStore = create((...a) => ({
   ...createSettingSlice(...a),
@@ -20,4 +22,5 @@ export const useAppStore = create((...a) => ({
   ...createJournalSlice(...a),
   ...createCommandSlice(...a),
   ...createNavigationSlice(...a),
+  ...createAudioSlice(...a),  // 引入音频相关的切片
 }));

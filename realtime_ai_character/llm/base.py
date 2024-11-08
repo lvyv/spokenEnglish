@@ -52,7 +52,9 @@ class AsyncCallbackTextHandler(AsyncCallbackHandler):
 
     async def on_llm_end(self, *args, **kwargs):
         if self._on_llm_end is not None:
-            await self._on_llm_end("".join(self.token_buffer))
+            # await self._on_llm_end("".join(self.token_buffer))
+            await self._on_llm_end(args[0])
+
             self.token_buffer.clear()
 
 

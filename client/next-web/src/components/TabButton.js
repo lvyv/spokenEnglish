@@ -9,17 +9,17 @@ export default function TabButton({
 }) {
   let styles;
   if (isSelected) {
-    styles = "bg-tab";
+    styles = "bg-blue-500 text-white";
   } else {
-    styles = "bg-transparent";
+    styles = "bg-transparent text-black";
   }
   return (
     <Button
       isBlock
       isDisabled={isDisabled}
       radius="full"
-      className={`h-11 w-full font-medium text-base md:text-lg justify-center py-4 text-foreground hover:opacity-80 ${className} ${styles}`}
-      onPress={handlePress}
+      className={`h-14 w-full font-medium text-lg justify-center py-3 px-4 hover:opacity-80 ${className} ${styles}`}
+      onClick={handlePress}
     >
       {children}
     </Button>

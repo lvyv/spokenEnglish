@@ -1,14 +1,3 @@
-#这是一个典型的 .gitignore 文件，用于指定 Git 应该忽略哪些文件和目录，以防止它们被版本控制系统跟踪。以下是该文件的功能总结：
-
-#忽略依赖：忽略了 Node.js 项目中的 node_modules 目录，因为通常不需要将依赖包包含在版本控制中，以及与 pnp 相关的文件。
-#测试：忽略了测试覆盖率报告文件，通常这些文件在项目开发和部署过程中不需要跟踪。
-#Next.js：忽略了 Next.js 项目中的 .next 和 /out 目录，这些目录包含了 Next.js 的构建输出，通常不需要跟踪。
-#生产环境：忽略了构建产生的 /build 目录，因为构建产物通常不应该包含在版本控制中。
-#杂项：忽略了操作系统生成的一些临时文件，比如 .DS_Store 在 macOS 中生成的隐藏文件，以及 .pem 格式的证书文件。
-#调试：忽略了一些调试日志文件，如 npm-debug.log* 和 yarn-error.log*，这些文件通常只在开发过程中使用。
-#本地环境文件：忽略了本地环境配置文件，这些文件通常包含敏感信息，如数据库密码等，不应该包含在版本控制中。
-#Vercel：忽略了与 Vercel 平台相关的文件，.vercel 目录可能包含一些缓存或配置信息。
-#TypeScript：忽略了 TypeScript 编译产生的 .tsbuildinfo 文件和 Next.js 自动生成的 next-env.d.ts 文件。
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -44,3 +33,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+

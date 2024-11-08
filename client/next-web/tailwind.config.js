@@ -1,17 +1,3 @@
-/*
-这段代码主要是一个 Tailwind CSS 的配置文件，用于定义项目中使用的主题、颜色、背景图等。
-以下是它的功能总结：
-
-1. 引入了 @nextui-org/react 模块，并从中解构出 nextui 对象。
-2. 使用 JSDoc 注释指定了 module.exports 的类型为 Tailwind CSS 的配置类型。
-3. 定义了 content 属性，用于指定需要处理的文件路径，包括页面、组件和主题相关文件。
-4. 在 theme 属性中，通过 extend 对象扩展了背景图片的渐变属性，同时定义了一系列颜色变量。
-5. 设置了 darkMode 为 'class'，表示启用 Dark Mode，并且根据 class 属性进行切换。
-6. 使用了 plugins 数组，其中包含了 nextui 插件的配置，用于定制 NextUI 的主题颜色和默认主题模式等。
-
-总的来说，这个配置文件定义了 Tailwind CSS 的一些基本配置，包括文件处理路径、颜色、背景图和 Dark Mode 等，同时集成了 NextUI 的定制主题插件。
-*/
-
 const { nextui } = require('@nextui-org/react');
 
 /** @type {import('tailwindcss').Config} */

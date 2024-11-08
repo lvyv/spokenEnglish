@@ -1,61 +1,122 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   
+   :root {
+     --foreground-rgb: 0, 0, 0;
+     --background-start-rgb: 255, 255, 255;
+     --background-end-rgb: 255, 255, 255;
+     --button-bg-start: #1E3A8A; 
+     --button-bg-end: #3B82F6; /* 蓝色渐变结束颜色 */
+     --button-border: #2563EB; /* 按钮边框颜色 */
+     --button-text: #FFFFFF; /* 按钮文本颜色 */
+   }
+   
+   @media (prefers-color-scheme: dark) {
+     :root {
+       --foreground-rgb: 255, 255, 255;
+       --background-start-rgb: 0, 0, 0;
+       --background-end-rgb: 0, 0, 0;
+       --button-bg-start: #3B82F6; /* 蓝色渐变开始颜色 */
+       --button-bg-end: #2563EB; /* 蓝色渐变结束颜色 */
+       --button-border: #1D4ED8; /* 按钮边框颜色 */
+       --button-text: #000000; /* 按钮文本颜色 */
+     }
+   }
+   
+   html, body {
+     margin: 0;
+     padding: 0;
+     width: 100%;
+     height: 100%;
+     background: linear-gradient(
+       to bottom,
+       rgb(var(--background-start-rgb)),
+       rgb(var(--background-end-rgb))
+     );
+     color: rgb(var(--foreground-rgb));
+   }
+   
+   .container {
+     max-width: 100%;
+     padding-left: 0;
+     padding-right: 0;
+     margin: 0; /* 确保没有外边距 */
+   }
+   
+   .full-width {
+     width: 100%;
+     padding-left: 0;
+     padding-right: 0;
+     margin: 0;
+   }
+   
+   footer {
+     background-color: var(--background);
+     color: var(--foreground-rgb);
+   }
+   
+   footer a {
+     color: #1D4ED8;
+   }
+   
+   footer a:hover {
+     color: #2563EB;
+   }
+  
+   .conversation_container .react-input-emoji--button {
+    position: absolute;
+    top: 42px;
+    left: 52px;
+    height: 40px;
+    width: 40px;
+    padding: 0 8px;
+    border-radius: 20px;
+    background: linear-gradient(to bottom, var(--button-bg-start), var(--button-bg-end)); 
+    border: 2px solid var(--button-border); 
   }
-}
+  
+  .conversation_container .react-input-emoji--button:hover {
+    background: linear-gradient(to bottom, var(--button-bg-end), var(--button-bg-start)); 
+  }
+  
+  .conversation_container .react-input-emoji--input {
+    font-weight: 300;
+    color: var(--foreground-rgb); 
+  }
+  
+  .react-input-emoji--container {
+    background: #fff; /* 修改为白色 */
+    border: 1px solid #ddd; /* 可选择保留边框颜色 */
+    border-radius: 4px;
+  }
+  
+  .react-input-emoji--input {
+    color: #000; /* 保持输入文本颜色 */
+  }
+  
 
-.conversation_container .react-input-emoji--container {
-  background: transparent;
-  border: 0;
-  margin-left: 0;
-  font-size: 16px;
-  font-weight: 300;
-  font-family: inherit;
-  color: #fff;
-}
+   .right-module-container {
+    max-width: 400px; /* 可以根据需要设置最大宽度 */
+    margin-left: auto;
+    margin-right: 0;
+    height: 100%;
+  }
 
-.conversation_container .react-emoji {
-  background: transparent;
-  border-radius: 12px;
-  height: 42px;
-}
-
-.conversation_container .react-input-emoji--button {
-  position:absolute;
-  top: 42px;
-  left: 52px;
-  height: 40px;
-  width: 40px;
-  padding: 0 8px;
-  border-radius: 20px;
-}
-
-.conversation_container .react-input-emoji--button:hover {
-  background: rgba(63,63,70,0.4);
-}
-
-.journal_mode .react-input-emoji--button {
-  position: relative;
-  top: auto;
-  left: auto;
-}
-
-.conversation_container .react-input-emoji--input {
-  font-weight: 300;
-}
-
-.conversation_container .react-emoji-picker--wrapper {
-  left: 0;
-}
+  ::-webkit-scrollbar {
+    width: 10px; 
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #F5F5F5; 
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #E0E0E0; /* 滚动条滑块颜色 */
+    border-radius: 10px; /* 滚动条滑块圆角 */
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #D0D0D0; /* 滚动条滑块悬停颜色 */
+  }

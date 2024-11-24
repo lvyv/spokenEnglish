@@ -34,16 +34,16 @@ export default function Tabs({ characters }) {
   return (
     <>
       <div className='flex flex-row justify-end mt-10'>
-        <div className='w-[430px] grid grid-cols-3 gap-5 border-2 rounded-full p-1 border-tab'>
+        <div className='w-[430px] grid grid-cols-3 gap-5 border-6 rounded-full p-1 border-tab'>
           <TabButton isSelected={tabNow === 'explore'} 
           handlePress={() => setTabNow('explore')} 
-          className='text-black text-xs' // 设置字体颜色为黑色
+          className='text-gray-900 text-xs' // 设置字体颜色为黑色
           >
            探索
           </TabButton>
           <TabButton isSelected={tabNow === 'community'} 
           handlePress={() => setTabNow('community')}
-          className='text-black text-xs' // 设置字体颜色为黑色
+          className='text-gray-900 text-xs' // 设置字体颜色为黑色
             >
             社区
           </TabButton>
@@ -51,7 +51,7 @@ export default function Tabs({ characters }) {
             isSelected={user && tabNow === 'myCharacters'}
             isDisabled={user == null}
             handlePress={() => setTabNow('myCharacters')}
-            className='text-black text-xs' // 设置字体颜色为黑色
+            className='text-gray-900 text-xs' // 设置字体颜色为黑色
           >
            角色
           </TabButton>

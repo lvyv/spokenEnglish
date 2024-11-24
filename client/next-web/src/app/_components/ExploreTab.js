@@ -1,6 +1,3 @@
-
-
-
 import CharacterCard from './CharacterCard';
 import { useState, useRef } from 'react';
 

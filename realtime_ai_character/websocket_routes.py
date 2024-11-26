@@ -269,14 +269,12 @@ async def handle_receive(   #  handle_receive接受多个参数
         # Send end of the greeting so the client knows when to start listening
         await manager.send_message(message="[end]\n", websocket=websocket)  # 问候结束
 
-        async def on_new_token(token):
-            return await manager.send_message(message=token, websocket=websocket)
-        # async def on_new_token(token):#文本输入可以发送一条回复一条啦
-        #     # 发送 token 消息
-        #     await manager.send_message(message=token, websocket=websocket)
-        #
-        #     # 发送 "[end]\n" 消息
-        #     await manager.send_message(message="[end]\n", websocket=websocket)
+        async def on_new_token(token):#文本输入可以发送一条回复一条啦
+            # 发送 token 消息
+            await manager.send_message(message=token, websocket=websocket)
+
+            # 发送 "[end]\n" 消息
+            await manager.send_message(message="[end]\n", websocket=websocket)
 
         async def stop_audio():  # 定义异步函数用于停止音频播放错误
             if tts_task and not tts_task.done():

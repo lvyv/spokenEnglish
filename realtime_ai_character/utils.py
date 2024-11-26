@@ -209,6 +209,8 @@ def timed(func):
 
 
 def task_done_callback(task: asyncio.Task):
-    exception = task.exception()
-    if exception:
-        logger.error(f"Error in task {task.get_name()}: {exception}")
+    try:
+        task.result()  # 检查任务是否正常完成
+    except Exception as e:
+        logger.error(f"Error in task {task.get_name()}: {e}")
+        logger.exception("Detailed task exception:")

@@ -102,10 +102,10 @@ class AsyncCallbackAudioHandler(AsyncCallbackHandler):
         punctuation = False
         if (
             # English punctuations
-            (
-                char == " "
-                and self.current_sentence != ""
-                and self.current_sentence[-1] in {".", "?", "!"}
+            (#zjl注释
+                # char == " "
+                # and self.current_sentence != ""
+                # and self.current_sentence[-1] in {".", "?", "!"}
             )
             # Chinese/Japanese/Korean punctuations
             or (char in {"。", "？", "！"})
@@ -121,7 +121,7 @@ class AsyncCallbackAudioHandler(AsyncCallbackHandler):
             if first_sentence:
                 timer.log("LLM First Sentence", lambda: timer.start("TTS First Sentence"))
             await self.text_to_speech.stream(
-                text=self.current_sentence.strip(),
+                text=(self.current_sentence.strip())+"???",#添加？？？
                 websocket=self.websocket,
                 tts_event=self.tts_event,
                 voice_id=self.voice_id,

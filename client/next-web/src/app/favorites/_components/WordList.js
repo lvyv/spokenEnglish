@@ -1,39 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { useAppStore } from '@/zustand/store'; // 假设你有这样一个store来管理收藏
 
 export default function WordList() {
-  const initialWords = [
-    { id: 1, word: 'Obfuscate', phonetic: '[ˈɒbfəsˌkeɪt]', type: 'v', translations: ['使模糊', '使费解', '混淆'] },
-    { id: 2, word: 'Pernicious', phonetic: '[pərˈnɪʃəs]', type: 'adj', translations: ['有害的', '恶性的', '致命的'] },
-    { id: 3, word: 'Sagacity', phonetic: '[səˈɡæsɪti]', type: 'n', translations: ['睿智', '洞察力', '明智'] },
-    { id: 4, word: 'Expeditiously', phonetic: '[ˌɛkspəˈdɪʃəsli]', type: 'adv', translations: ['迅速地', '高效地'] },
-    { id: 5, word: 'Prevaricate', phonetic: '[prɪˈværɪˌkeɪt]', type: 'v', translations: ['支吾其词', '搪塞', '闪烁其词'] },
-    { id: 6, word: 'Lugubrious', phonetic: '[luˈɡuːbriəs]', type: 'adj', translations: ['悲哀的', '忧郁的'] },
-    { id: 7, word: 'Ephemeral', phonetic: '[ɪˈfɛmərəl]', type: 'adj', translations: ['短暂的', '朝生暮死的'] },
-    { id: 8, word: 'Ebullient', phonetic: '[ɪˈbʌljənt]', type: 'adj', translations: ['热情洋溢的', '精力充沛的'] },
-    { id: 9, word: 'Grandiloquent', phonetic: '[ɡrænˈdɪləkwənt]', type: 'adj', translations: ['夸张的', '浮夸的'] },
-    { id: 10, word: 'Halcyon', phonetic: '[ˈhælsiən]', type: 'adj', translations: ['平静的', '幸福的'] },
-    // 更多单词...
-  ];
+  // 从zustand获取收藏的单词
+  const favoriteWords = useAppStore((state) => state.favoriteWords) || [];  // 确保 favoriteWords 默认是一个空数组
 
-  for (let i = 11; i <= 100; i++) {
-    initialWords.push({
-      id: i,
-      word: `Word${i}`,
-      phonetic: `[wɜːd${i}]`,
-      type: i % 2 === 0 ? 'n' : 'v',
-      translations: ['翻译1', '翻译2', `翻译${i}`],
-    });
-  }
-
-  const [words, setWords] = useState(initialWords);
   const [currentPage, setCurrentPage] = useState(1);
   const [isManaging, setIsManaging] = useState(false);
   const [selectedWords, setSelectedWords] = useState([]);
 
   const itemsPerPage = 5;
-  const totalPages = Math.ceil(words.length / itemsPerPage);
+  const totalPages = Math.ceil(favoriteWords.length / itemsPerPage);
 
   const handleChangePage = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -41,7 +20,7 @@ export default function WordList() {
     }
   };
 
-  const displayedWords = words.slice(
+  const displayedWords = favoriteWords.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -58,20 +37,21 @@ export default function WordList() {
   };
 
   const handleDeleteWords = () => {
-    setWords(words.filter((word) => !selectedWords.includes(word.id)));
+    // 从 store 中删除选中的单词
+    selectedWords.forEach((id) => {
+      useAppStore.getState().removeWord(id);
+    });
     setIsManaging(false);
   };
 
-  // 动态生成页码
+  // 动态生成分页
   const renderPagination = () => {
     const pages = [];
     if (totalPages <= 10) {
-      // 如果页数少于10，直接显示所有页码
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // 页数多于10，显示带省略号的分页
       if (currentPage <= 3) {
         pages.push(1, 2, 3, 4, '...', totalPages);
       } else if (currentPage >= totalPages - 2) {
@@ -87,9 +67,9 @@ export default function WordList() {
     <div className="p-4 bg-white rounded shadow-lg h-full">
       {/* 标题行 */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">单词列表</h2>
+        <h2 className="text-xl font-bold">我的收藏单词</h2>
         {isManaging ? (
-          <div className=" bg-white space-x-2">
+          <div className="bg-white space-x-2">
             <button
               onClick={handleDeleteWords}
               className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -120,7 +100,7 @@ export default function WordList() {
             key={item.id}
             className="p-4 flex items-center rounded"
             style={{
-              backgroundColor: words.indexOf(item) % 2 === 0 ? '#F5F5F5' : '#FFFFFF',
+              backgroundColor: displayedWords.indexOf(item) % 2 === 0 ? '#F5F5F5' : '#FFFFFF',
             }}
           >
             {isManaging && (
@@ -189,3 +169,45 @@ export default function WordList() {
     </div>
   );
 }
+
+
+
+
+// import { useAppStore } from '@/zustand/store';
+
+// export default function WordList() {
+//   // 从 Zustand 中获取 favorites 和 removeFavorite
+//   const { favorites = [], removeFavorite } = useAppStore();
+
+//   // 处理移除收藏单词的逻辑
+//   const handleRemoveFavorite = (word) => {
+//     removeFavorite(word);
+//   };
+
+//   return (
+//     <div className="p-6 bg-white rounded shadow-md h-full overflow-y-auto">
+//       <h2 className="text-xl font-bold mb-4">收藏单词</h2>
+//       {favorites && favorites.length > 0 ? ( // 添加检查
+//         <ul>
+//           {favorites.map((word, index) => (
+//             <li
+//               key={index}
+//               className="flex justify-between items-center mb-2 border-b pb-2"
+//             >
+//               <span className="text-gray-800">{word}</span>
+//               <button
+//                 onClick={() => handleRemoveFavorite(word)}
+//                 className="text-red-500 hover:underline"
+//               >
+//                 移除
+//               </button>
+//             </li>
+//           ))}
+//         </ul>
+//       ) : (
+//         <p className="text-gray-500">暂无收藏的单词</p>
+//       )}
+//     </div>
+//   );
+// }
+

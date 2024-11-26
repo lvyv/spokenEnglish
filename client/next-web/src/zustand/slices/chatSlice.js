@@ -1,4 +1,15 @@
 export const createChatSlice = (set, get) => ({
+
+  favorites: [], 
+  addFavoriteWord: (word) =>
+    set((state) => ({
+      favorites: [...state.favorites, word],
+    })),
+  removeFavoriteWord: (word) =>
+    set((state) => ({
+      favorites: state.favorites.filter((item) => item !== word),
+    })),
+
   // interimChat = null means not in text streaming.
   interimChat: null,
   setSender: (sender) => {
@@ -45,4 +56,10 @@ export const createChatSlice = (set, get) => ({
     clearSpeechInterim: (str) => {
       set({speechInterim: ''});
     }
+
+
+
 })
+
+
+

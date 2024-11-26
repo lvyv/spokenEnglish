@@ -14,6 +14,24 @@ from realtime_ai_character.websocket_routes import router as websocket_router
 from realtime_ai_character.utils import Character  # 测试用
 import os#添
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"#添
+import sys
+import os
+
+# 获取项目根目录
+project_root = os.path.dirname(os.path.abspath(__file__))
+
+# 添加 OpenVoice 目录到 PYTHONPATH
+openvoice_path = os.path.join(project_root, "audio", "OpenVoice")
+if openvoice_path not in sys.path:
+    sys.path.append(openvoice_path)
+
+# 确保 text_to_speech 包正确导入时有相同的项目路径
+text_to_speech_path = os.path.join(project_root, "audio", "text_to_speech")
+if text_to_speech_path not in sys.path:
+    sys.path.append(text_to_speech_path)
+
+
+
 
 app = FastAPI()
 

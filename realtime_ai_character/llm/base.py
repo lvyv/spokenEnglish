@@ -121,7 +121,7 @@ class AsyncCallbackAudioHandler(AsyncCallbackHandler):
             if first_sentence:
                 timer.log("LLM First Sentence", lambda: timer.start("TTS First Sentence"))
             await self.text_to_speech.stream(
-                text=(self.current_sentence.strip())+"???",#添加？？？
+                text=(self.current_sentence.strip()),
                 websocket=self.websocket,
                 tts_event=self.tts_event,
                 voice_id=self.voice_id,

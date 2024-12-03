@@ -1,4 +1,6 @@
 import {
+  RiStarLine,  
+  RiStarFill,  
   RiThumbUpLine,
   RiThumbDownLine,
   RiEyeOffLine,
@@ -11,7 +13,7 @@ import Image from 'next/image';
 import realCharSVG from '@/assets/svgs/realchar.svg';
 
 export default function Chat() {
-  const { chatContent, interimChat, character, otheraudioQueue } = useAppStore();
+  //const { chatContent, interimChat, character, otheraudioQueue } = useAppStore();
   const messageEndRef = useRef(null);
   const [blurred, setBlurred] = useState(true);
   const [selectedWord, setSelectedWord] = useState('');
@@ -20,6 +22,23 @@ export default function Chat() {
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
   const popoverRef = useRef(null);
   const selectedWordRef = useRef(null);
+  const { chatContent, interimChat, character, otheraudioQueue } = useAppStore();
+
+
+
+  const { addFavorite, removeFavorite, isFavorite } = useAppStore();
+  const handleFavoriteClick = (word) => {
+    if (isFavorite(word)) {
+      console.log(`Removing from favorites: ${word}`);
+      removeFavorite(word);
+    } else {
+      console.log(`Adding to favorites: ${word}`);
+      addFavorite(word);
+    }
+  };
+
+
+
 
   useEffect(() => {
     messageEndRef.current.scrollIntoView({
@@ -74,15 +93,17 @@ export default function Chat() {
     setSelectedWord(cleanWord);
     fetchWordInfo(cleanWord);
 
-    // 更新弹窗位置，确保其在单词旁边
+   
+
+    
     const rect = event.target.getBoundingClientRect();
     setPopoverPosition({
-        top: rect.top + window.scrollY + 10, // 在单词下方显示
+        top: rect.top + window.scrollY + 10, 
         left: rect.left + window.scrollX
     });
     
     setIsPopoverVisible(true);
-    selectedWordRef.current = event.target; // 保存被点击的单词
+    selectedWordRef.current = event.target; 
 };
 
   const playPronunciation = () => {
@@ -147,7 +168,7 @@ export default function Chat() {
                         <p className={`w-fit max-w-[450px] py-2 px-5 font-light flex-none rounded-3xl md:mr-3 rounded-bl-none bg-real-blue-500/20 whitespace-pre-wrap ${blurred ? 'filter blur' : ''}`}>
                           {line.content.split(' ').map((word, index) => (
                             <span key={index} className="cursor-pointer" onClick={(e) => handleWordClick(word, e)}>
-                              {word}{' '}
+                              {word}{' '}  
                             </span>
                           ))}
                         </p>
@@ -164,6 +185,8 @@ export default function Chat() {
                           <Button isIconOnly aria-label="thumb down" radius="full" variant="light" className="text-gray-600 hover:text-white hover:bg-blue-600 min-w-fit md:min-w-10 md:h-10">
                             <RiThumbDownLine size="1.5em" />
                           </Button>
+
+
                         </div>
                       </div>
                     </div>
@@ -196,14 +219,30 @@ export default function Chat() {
       </div>
 
       {isPopoverVisible && (
-        <div 
-          ref={popoverRef} 
-          className="absolute z-10 bg-white p-4 rounded-lg shadow-lg max-w-[300px] w-full" 
+        <div
+          ref={popoverRef}
+          className="absolute z-10 bg-white p-4 rounded-lg shadow-lg max-w-[300px] w-full"
           style={{ top: popoverPosition.top, left: popoverPosition.left }}
         >
           <h3 className="font-semibold text-xl text-real-blue-600 mb-2">{selectedWord}</h3>
+
+          <Button
+            isIconOnly
+            aria-label="add to favorites"
+            radius="full"
+            variant="light"
+            className="text-gray-600 hover:text-white hover:bg-blue-600"
+            onClick={() => handleFavoriteClick(selectedWord)}
+          >
+            {isFavorite(selectedWord) ? (
+              <RiStarFill size="1.5em" /> // 实心星表示已收藏
+            ) : (
+              <RiStarLine size="1.5em" /> // 空心星表示未收藏
+            )}
+          </Button>
+
+
           <p className="text-sm text-gray-800 mb-2">定义：{wordInfo.definition}</p>
-          {/* 如果“用法”不是“无例句”，则显示“用法”行 */}
           {wordInfo.usage !== '无例句' && wordInfo.usage && (
             <p className="text-sm text-gray-700 mb-2">用法：{wordInfo.usage}</p>
           )}

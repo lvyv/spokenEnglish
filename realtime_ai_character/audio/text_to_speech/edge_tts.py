@@ -116,11 +116,11 @@ class EdgeTTS(Singleton, TextToSpeech):
         with open(final_audio_path, "rb") as f:
             final_audio_data = f.read()
 
-        # 删除最终输出文件
+            # 删除最终输出文件
         os.remove(final_audio_path)
-
         # 发送生成的音频流到 websocket
         await websocket.send_bytes(final_audio_data)
+
 
         # 清空缓存
         self.text_cache.clear()

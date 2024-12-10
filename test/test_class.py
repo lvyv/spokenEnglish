@@ -1,32 +1,22 @@
-class MyClass:
-    # 类属性
-    class_attribute = "I am a class attribute"
 
-    def __init__(self, value):
-        # 实例属性
-        self.instance_attribute = value
+import asyncio
 
-    @classmethod
-    def setCA(cls, value):
-        cls.class_attribute = value
+import edge_tts
 
-# 访问类属性
-print(MyClass.class_attribute)  # 输出: I am a class attribute
+TEXT = "大家好，欢迎关注语音之家，语音之家是一个助理AI语音开发者的社区。"
+VOICE = "zh-CN-YunyangNeural"
+OUTPUT_FILE = "./test1.mp3"
 
-# 修改类属性
-MyClass.class_attribute = "New class attribute value"
-print(MyClass.class_attribute)  # 输出: New class attribute value
 
-# 创建实例
-instance = MyClass("I am an instance attribute")
+async def amain() -> None:
+    """Main function"""
+    communicate = edge_tts.Communicate(TEXT, VOICE)
+    await communicate.save(OUTPUT_FILE)
 
-# 访问实例属性
-print(instance.instance_attribute)  # 输出: I am an instance attribute
 
-# 访问类属性（通过实例）
-print(instance.class_attribute)  # 输出: New class attribute value
-
-# 修改类属性（通过实例，不推荐）
-# instance.class_attribute = "Modified through instance"
-instance.setCA("Modified")
-print(MyClass.class_attribute)  # 输出: Modified through instance
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop_policy().get_event_loop()
+    try:
+        loop.run_until_complete(amain())
+    finally:
+        loop.close()

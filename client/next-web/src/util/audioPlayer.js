@@ -1,6 +1,6 @@
 // src/util/audioPlayer.js
 
-let audioCache = {}; // 用于缓存音频数据
+let audioCache = {}; 
 
 // 播放音频的函数
 export const playOtherAudio = (audioData) => {

@@ -104,10 +104,14 @@
       nmake /F Makefile.win
       nmake /F Makefile.win install
       ```
-    - Finally, in the database connection tool, select the specific database instance and run the following command to expand the vector type.
+  - Finally, in the database connection tool, select the specific database instance and run the following command to expand the vector type.
     ```sh
-    CREATE EXTENSION vector;
+      CREATE EXTENSION vector;
+    ```
+**Step 10** 
+- Run db upgrade
+    ```sh
+    alembic upgrade head
     ```
     
-    
-      After running these commands, a local development server will start, and your default web browser will open a new tab/window pointing to this server (usually http://localhost:3000).
+After running these commands, a local development server will start, and your default web browser will open a new tab/window pointing to this server (usually http://localhost:3000).

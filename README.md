@@ -48,7 +48,7 @@
 - **Step 3**. Setup `.env`:
   
   ```sh
-  cp .env.example .env
+  cp ..env .env
   ```
   
     Update API keys and configs following the instructions in the `.env` file.
@@ -64,7 +64,7 @@
       Create an `.env` file under `client/next-web/`
     
     ```sh
-    cp client/next-web/.env.example client/next-web/.env
+    cp client/next-web/..env client/next-web/.env
     ```
     
       Adjust `.env` according to the instruction in `client/next-web/README.md`.

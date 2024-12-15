@@ -8,8 +8,10 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=True)  # 用户名（可选）
     email = Column(String, unique=True, index=True, nullable=True)  # 邮箱（可选）
-    phone = Column(String, unique=True, index=True, nullable=False)  # 必须绑定手机号
+    phone = Column(String, unique=True, index=True, nullable=True)  # 必须绑定手机号
     github_id = Column(String, unique=True, nullable=True)  # GitHub ID（可选）
+    github_name = Column(String, nullable=True)  # GitHub 用户名（可选）
+    github_email = Column(String, nullable=True)  # GitHub 用户邮箱（可选）
     qq_id = Column(String, unique=True, nullable=True)  # QQ ID（可选）
     wechat_id = Column(String, unique=True, nullable=True)  # 微信 ID（可选）
     password_hash = Column(String, nullable=True)  # 邮箱登录的密码（经过哈希处理）

@@ -68,28 +68,6 @@ export const createWebsocketSlice = (set, get) => ({
       // 将二进制数据推入 audioQueue
       get().audioQueue.push(event.data); 
       console.log('二进制数据已添加到 audioQueue');
-
-      // 将二进制数据推入 otheraudioQueue
-      get().pushOtherAudioQueue(event.data); 
-      console.log('二进制数据已添加到 otheraudioQueue');
-      console.log(
-        '收到音频: ',
-        event.data.byteLength, // 音频数据大小
-        ' 字节，扬声器: ',
-        get().selectedSpeaker.values().next().value, // 选择的扬声器
-        ' 静音: ',
-        get().isMute, // 是否静音
-        ' 麦克风: ',
-        get().selectedMicrophone.values().next().value, // 选择的麦克风
-        ' 麦克风静音: ',
-        get().disableMic, // 是否禁用麦克风
-        ' 正在播放: ',
-        get().isPlaying, // 是否正在播放
-        ' 音频播放器播放中: ',
-        get().audioPlayerRef.current ? !get().audioPlayerRef.current.paused : undefined, // 播放器是否正在播放
-        ' 队列中的音频数: ',
-        get().audioQueue.length // 音频队列的长度
-      );
     }
   },
 

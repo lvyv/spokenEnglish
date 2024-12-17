@@ -47,6 +47,7 @@ from dotenv import load_dotenv
 load_dotenv()
 router = APIRouter()
 
+
 from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
@@ -57,7 +58,7 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 
 from realtime_ai_character.database.connection import get_db
-from realtime_ai_character.models.scenes import Scene
+from realtime_ai_character.models.scene import Scene
 
 load_dotenv()
 

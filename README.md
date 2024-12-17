@@ -48,7 +48,7 @@
 - **Step 3**. Setup `.env`:
   
   ```sh
-  cp .env.example .env
+  cp ..env .env
   ```
   
     Update API keys and configs following the instructions in the `.env` file.
@@ -64,7 +64,7 @@
       Create an `.env` file under `client/next-web/`
     
     ```sh
-    cp client/next-web/.env.example client/next-web/.env
+    cp client/next-web/..env client/next-web/.env
     ```
     
       Adjust `.env` according to the instruction in `client/next-web/README.md`.
@@ -76,9 +76,38 @@
     npm install
     npm run dev
     ```
+- **Step 6**
+    - **Use the following SQL statement to create a scenes table.**
+    ```sh
+    CREATE TABLE scenes (
+      id SERIAL PRIMARY KEY,   
+      name VARCHAR(255) NOT NULL,   
+      image VARCHAR(255) NOT NULL,  
+      category VARCHAR(255) NOT NULL  );
+    ```
+- **Step 7**
+    - Run`text/text.py`
+
+- **Step 8**
+    - Download the checkpoint from [here](https://myshell-public-repo-host.s3.amazonaws.com/openvoice/checkpoints_1226.zip) and extract it to the `checkpoints` folder.
+  
+- **Step 9**
+    PostgreSQL extension installation
+    - Download the Vector from [here](https://pgxn.org/dist/vector/)
+    - Compiling on Windows requires you to download Visual Studio first
+    - Select C++ during installation
+    - After the installation is complete, open cmd in Administrator Mode and execute the following commands in turn to complete the installation.
+      ```sh
+      call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+      cd C:\Users\xxx\Downloads\vector-0.7.3
+      set "PGROOT=C:\Program Files\PostgreSQL\16"
+      nmake /F Makefile.win
+      nmake /F Makefile.win install
+      ```
+    - Finally, in the database connection tool, select the specific database instance and run the following command to expand the vector type.
+    ```sh
+    CREATE EXTENSION vector;
+    ```
     
     
-    
-    
-    
-    After running these commands, a local development server will start, and your default web browser will open a new tab/window pointing to this server (usually http://localhost:3000).
+      After running these commands, a local development server will start, and your default web browser will open a new tab/window pointing to this server (usually http://localhost:3000).

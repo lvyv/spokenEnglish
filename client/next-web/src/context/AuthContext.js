@@ -1,3 +1,8 @@
+/*
+12.3 yaloxin
+实现了一个 React 上下文（Context），用于管理和提供 Firebase 身份验证（auth）相关的信息，允许整个应用访问和处理用户的身份验证状态。
+它包含了身份验证的监听器和上下文提供器，以及一个自定义的 Hook，用来方便地在子组件中获取当前用户的信息
+*/
 import React from 'react';
 import { onAuthStateChanged, getAuth } from 'firebase/auth'; // 从 Firebase 导入身份验证相关的方法
 import firebase_app from '@/firebase/config'; // 导入 Firebase 配置

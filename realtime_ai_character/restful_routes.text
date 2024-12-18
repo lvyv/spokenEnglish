@@ -2,9 +2,8 @@ import asyncio
 import datetime
 import os
 import uuid
-from typing import Optional,List
+from typing import Optional
 
-import firebase_admin
 import httpx
 from fastapi import (
     APIRouter,
@@ -16,14 +15,10 @@ from fastapi import (
     status as http_status,
     UploadFile,
 )
-
-import hashlib
-import requests
-from firebase_admin import auth, credentials
-from firebase_admin.exceptions import FirebaseError
 from google.cloud import storage
-from sqlalchemy import func,create_engine
-from sqlalchemy.orm import Session,sessionmaker
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 from realtime_ai_character.audio.text_to_speech import get_text_to_speech
 from realtime_ai_character.database.connection import get_db
 from realtime_ai_character.llm.highlight_action_generator import (
@@ -42,151 +37,134 @@ from realtime_ai_character.models.character import (
     GeneratePromptRequest,
 )
 
+import jwt
+from fastapi.security import OAuth2PasswordBearer
 from dotenv import load_dotenv
 
-load_dotenv()
-router = APIRouter()
-
-
-from fastapi import FastAPI, Depends, HTTPException, APIRouter
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from typing import List
-import os
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-
-from realtime_ai_character.database.connection import get_db
-from realtime_ai_character.models.scene import Scene
-
-load_dotenv()
-
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
-if not SQLALCHEMY_DATABASE_URL:
-    raise ValueError("DATABASE_URL is not set")
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],  # 允许所有头部
-)
+from fastapi import FastAPI, APIRouter, HTTPException, Request, status as http_status
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from passlib.context import CryptContext
+import jwt
+import datetime
 
-
-class SceneResponse(BaseModel):
-    id: int
-    name: str
-    image: str
-    category: str  # 添加类别字段
-
-    class Config:
-        # from_attributes = True  # 使用新的配置键
-        orm_mode = True  # 确保启用 ORM 模式
-
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from transformers import MarianMTModel, MarianTokenizer
-import os
-
-# 创建 APIRouter 实例
-router = APIRouter()
-
-# 获取当前脚本所在目录的路径
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# 模型路径配置使用相对路径
-ZH_EN_MODEL_PATH = os.path.join(current_dir, "model", "zh-en")  # 中文 -> 英文模型路径
-EN_ZH_MODEL_PATH = os.path.join(current_dir, "model", "en-zh")  # 英文 -> 中文模型路径
-
-# 加载模型和分词器
-zh_en_tokenizer = MarianTokenizer.from_pretrained(ZH_EN_MODEL_PATH, local_files_only=True)
-zh_en_model = MarianMTModel.from_pretrained(ZH_EN_MODEL_PATH, local_files_only=True)
-
-en_zh_tokenizer = MarianTokenizer.from_pretrained(EN_ZH_MODEL_PATH, local_files_only=True)
-en_zh_model = MarianMTModel.from_pretrained(EN_ZH_MODEL_PATH, local_files_only=True)
-
-# 请求模型
-class TranslateRequest(BaseModel):
-    text: str
-    direction: str = "en-zh"  # 默认翻译方向为英文 -> 中文
-
-
-@router.post("/translate")
-async def translate_text(request: TranslateRequest):
-    """
-    翻译文本接口，支持中英文互译
-    - direction: "zh-en"（中文 -> 英文）或 "en-zh"（英文 -> 中文）
-    """
-    text = request.text
-    direction = request.direction
-
-    if not text:
-        raise HTTPException(status_code=400, detail="Text to translate cannot be empty")
-
-    # 根据翻译方向选择模型和分词器
-    if direction == "zh-en":
-        tokenizer, model = zh_en_tokenizer, zh_en_model
-    elif direction == "en-zh":
-        tokenizer, model = en_zh_tokenizer, en_zh_model
-    else:
-        raise HTTPException(status_code=400, detail="Invalid translation direction")
-
-    # 执行翻译
-    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
-    translated = model.generate(**inputs)
-    translated_text = tokenizer.decode(translated[0], skip_special_tokens=True)
-
-    return {"translated_text": translated_text}
-
-
-
-# 获取所有 scenes 的 API
-@router.get("/scenes", response_model=List[SceneResponse])
-def get_scenes(db: Session = Depends(get_db)):
-    scenes = db.query(Scene).all()
-    return [SceneResponse.from_orm(scene) for scene in scenes]  # 确保返回字典格式
-
-
-# 将路由注册到 FastAPI 应用中
-app.include_router(router)
-
-if os.getenv("USE_AUTH") == "true":
-    cred = credentials.Certificate(os.environ.get("FIREBASE_CONFIG_PATH"))
-    firebase_admin.initialize_app(cred)
-
+from models.user import User
 MAX_FILE_UPLOADS = 5
 
+# # 添加 CORS 中间件，允许来自 http://localhost:3000 的请求
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["http://localhost:3000"],  # 前端的地址
+#     allow_credentials=True,
+#     allow_methods=["*"],  # 允许所有方法
+#     allow_headers=["*"],  # 允许所有请求头
+# )
 
-async def get_current_user(request: Request):
+
+router = APIRouter()
+
+# 加载 .env 文件中的环境变量
+load_dotenv()
+
+# 获取 NextAuth Secret 密钥
+JWT_SECRET_KEY = os.getenv("NEXTAUTH_SECRET")
+
+# 创建密码加密上下文
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# 登录接口请求和响应模型
+class UserLogin(BaseModel):
+    phone: str
+    password: str
+
+class GitHubLogin(BaseModel):
+    github_id: str
+
+# 用于验证用户身份
+def authenticate_user(phone: str, password: str, db: Session):
+    user = User.get_by_phone(db, phone)
+    if user and pwd_context.verify(password, user.password_hash):
+        return user
+    return None
+
+def authenticate_github_user(github_id: str, db: Session):
+    # 根据 GitHub ID 查找用户
+    user = User.get_by_github_id(db, github_id)
+    if user:
+        return user
+    return None
+
+# 生成JWT令牌
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # 设置过期时间为1小时
+    to_encode.update({"exp": expire})
+    
+    if "sub" in to_encode and len(to_encode["sub"]) > 0 and not to_encode["sub"].startswith("github_"):
+        to_encode["sub"] = f"github_{to_encode['sub']}"  # 这里我们在 sub 前加上 'github_' 来标识 GitHub 用户
+        
+    encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm="HS256")
+    return encoded_jwt
+
+# 解码 JWT 的函数
+def decode_jwt(token: str):
+    try:
+        # 使用 NextAuth 的 SECRET_KEY 解码
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.JWTError:
+        raise HTTPException(status_code=403, detail="Invalid token")
+
+
+@router.post("/login")
+async def login(user_login: UserLogin = None, github_login: GitHubLogin = None, db: Session = Depends(get_db)):
+    if user_login:
+        # 手机号密码登录
+        user = authenticate_user(user_login.phone, user_login.password, db)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    elif github_login:
+        # GitHub 登录
+        user = authenticate_github_user(github_login.github_id, db)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid GitHub credentials")
+
+
+    else:
+        raise HTTPException(status_code=400, detail="No login credentials provided")
+
+    # 生成JWT令牌
+    access_token = create_access_token(data={"sub": user.phone if user else user.github_id})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+async def get_current_user(request: Request, db: Session = Depends(get_db)):
     """Returns the current user if the request is authenticated, otherwise None."""
     if os.getenv("USE_AUTH") == "true" and "Authorization" in request.headers:
-        # Extracts the token from the Authorization header
+        # 从 Authorization 头部提取 token
         tokens = request.headers.get("Authorization", "").split("Bearer ")
         if not tokens or len(tokens) < 2:
             raise HTTPException(
-                status_code=http_status.HTTP_401_UNAUTHORIZED,
+                status_code=401,
                 detail="Invalid authentication credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        # token = tokens[1]
-        # try:
-        #     # Verify the token against the Firebase Auth API.
-        #     decoded_token = auth.verify_id_token(token)
-        # except FirebaseError:
-        #     raise HTTPException(
-        #         status_code=http_status.HTTP_401_UNAUTHORIZED,
-        #         detail="Invalid authentication credentials",
-        #         headers={"WWW-Authenticate": "Bearer"},
-        #     )
-        return {"message": "Current user is authenticated"}
-
+        token = tokens[1]
+        try:
+            # 使用 decode_jwt 解码并验证 JWT
+            decoded_token = decode_jwt(token)
+            user = None
+            if decoded_token["sub"].startswith("github_"):
+                user = User.get_by_github_id(db, decoded_token["sub"].replace("github_", ""))
+            else:
+                user = User.get_by_phone(db, decoded_token["sub"])
+            
+            if not user:
+                raise HTTPException(status_code=401, detail="User not found")
+            return user
+        except HTTPException as e:
+            raise e
 
 @router.get("/status")
 async def status():
@@ -601,6 +579,3 @@ async def generate_highlight(
         result = await generate_highlight_action(context)
 
     return {"highlight": result}
-
-
-

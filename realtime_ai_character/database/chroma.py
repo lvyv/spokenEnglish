@@ -16,7 +16,7 @@ def __init__(self):
 
 def get_embedding(text):
     try:
-        model = 'models/embedding-001'
+        model = 'model/embedding-001'
         embedding = genai.embed_content(model=model,
                                         content=text,
                                         task_type="retrieval_document")

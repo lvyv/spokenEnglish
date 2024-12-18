@@ -7,12 +7,14 @@ import BlurToggle from './_components/BlurToggle';
 import WordPopover from './_components/WordPopover';
 import realCharSVG from '@/assets/svgs/realchar.svg';
 import TextToSpeech from './_components/TextToSpeech';
+import axios from 'axios'; // 用于发送翻译请求
 
 export default function Chat() {
   const { chatContent, interimChat, character } = useAppStore();
   const messageEndRef = useRef(null);
 
   const [blurredStates, setBlurredStates] = useState({});
+  const [translatedTexts, setTranslatedTexts] = useState({}); // 用于存储翻译结果
 
   const { playTextToSpeech, isPlaying } = TextToSpeech();
 
@@ -31,6 +33,23 @@ export default function Chat() {
       ...prev,
       [id]: newBlurredState,
     }));
+  };
+
+  // 翻译功能
+  const handleTranslate = async (content, direction, timestamp) => {
+    try {
+      const response = await axios.post('http://127.0.0.1:18080/translate', {
+        text: content,
+        direction: direction,  // 可以根据需要设置翻译方向，如 'en-zh' 或 'zh-en'
+      });
+
+      setTranslatedTexts((prev) => ({
+        ...prev,
+        [timestamp]: response.data.translated_text,  // 存储翻译结果
+      }));
+    } catch (error) {
+      console.error('Translation error:', error);
+    }
   };
 
   return (
@@ -87,9 +106,26 @@ export default function Chat() {
                         >
                           <RiThumbDownLine size="1.5em" />
                         </Button>
+                        {/* 添加翻译按钮 */}
+                        <Button
+                          isIconOnly
+                          aria-label="translate"
+                          radius="full"
+                          variant="light"
+                          className="text-gray-600 hover:text-white hover:bg-blue-600 min-w-fit md:min-w-10 md:h-10"
+                          onClick={() => handleTranslate(line.content, 'en-zh', line.timestamp)} // 假设用户是输入英文，翻译成中文
+                        >
+                          翻译
+                        </Button>
                       </div>
                     </div>
                   </div>
+                  {/* 显示翻译结果 */}
+                  {translatedTexts[line.timestamp] && (
+                    <div className="mt-2 text-sm text-gray-600">
+                      <strong>翻译:</strong> {translatedTexts[line.timestamp]}
+                    </div>
+                  )}
                 </div>
               );
             } else if (line && line.hasOwnProperty('from') && line.from === 'user') {

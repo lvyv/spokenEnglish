@@ -1,0 +1,2 @@
+node_modules/@next/swc-win32-x64-msvc/next-swc.win32-x64-msvc.node filter=lfs diff=lfs merge=lfs -text
+realtime_ai_character/model/zh-en/models--Helsinki-NLP--opus-mt-zh-en/blobs/* filter=lfs diff=lfs merge=lfs -text

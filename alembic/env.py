@@ -14,7 +14,7 @@ from realtime_ai_character.models.feedback import Feedback
 from realtime_ai_character.models.interaction import Interaction
 from realtime_ai_character.models.memory import Memory
 from realtime_ai_character.models.quivr_info import QuivrInfo
-from realtime_ai_character.models.user import User  
+from realtime_ai_character.models.user import User
 
 
 load_dotenv()
@@ -23,7 +23,7 @@ load_dotenv()
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root)
 
-# import your models here
+# import your model here
 
 # this is the Alembic Config object, which provides access to the values
 # within the .ini file in use.

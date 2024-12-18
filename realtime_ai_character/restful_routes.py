@@ -89,9 +89,61 @@ class SceneResponse(BaseModel):
         from_attributes = True  # 使用新的配置键
         orm_mode = True  # 确保启用 ORM 模式
 
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from transformers import MarianMTModel, MarianTokenizer
+import os
 
 # 创建 APIRouter 实例
 router = APIRouter()
+
+# 获取当前脚本所在目录的路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# 模型路径配置使用相对路径
+ZH_EN_MODEL_PATH = os.path.join(current_dir, "model", "zh-en")  # 中文 -> 英文模型路径
+EN_ZH_MODEL_PATH = os.path.join(current_dir, "model", "en-zh")  # 英文 -> 中文模型路径
+
+# 加载模型和分词器
+zh_en_tokenizer = MarianTokenizer.from_pretrained(ZH_EN_MODEL_PATH, local_files_only=True)
+zh_en_model = MarianMTModel.from_pretrained(ZH_EN_MODEL_PATH, local_files_only=True)
+
+en_zh_tokenizer = MarianTokenizer.from_pretrained(EN_ZH_MODEL_PATH, local_files_only=True)
+en_zh_model = MarianMTModel.from_pretrained(EN_ZH_MODEL_PATH, local_files_only=True)
+
+# 请求模型
+class TranslateRequest(BaseModel):
+    text: str
+    direction: str = "en-zh"  # 默认翻译方向为英文 -> 中文
+
+
+@router.post("/translate")
+async def translate_text(request: TranslateRequest):
+    """
+    翻译文本接口，支持中英文互译
+    - direction: "zh-en"（中文 -> 英文）或 "en-zh"（英文 -> 中文）
+    """
+    text = request.text
+    direction = request.direction
+
+    if not text:
+        raise HTTPException(status_code=400, detail="Text to translate cannot be empty")
+
+    # 根据翻译方向选择模型和分词器
+    if direction == "zh-en":
+        tokenizer, model = zh_en_tokenizer, zh_en_model
+    elif direction == "en-zh":
+        tokenizer, model = en_zh_tokenizer, en_zh_model
+    else:
+        raise HTTPException(status_code=400, detail="Invalid translation direction")
+
+    # 执行翻译
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+    translated = model.generate(**inputs)
+    translated_text = tokenizer.decode(translated[0], skip_special_tokens=True)
+
+    return {"translated_text": translated_text}
+
 
 
 # 获取所有 scenes 的 API

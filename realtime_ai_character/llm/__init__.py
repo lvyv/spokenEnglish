@@ -21,7 +21,7 @@ def get_llm(model="gemini-1.5-flash") -> LLM:  # try原来为默认模型
 
         return AnthropicLlm(model=model)
     elif "localhost" in model:
-        # Currently use llama2-wrapper to run local llama models
+        # Currently use llama2-wrapper to run local llama model
         local_llm_url = os.getenv("LOCAL_LLM_URL", "")
         if local_llm_url:
             from realtime_ai_character.llm.local_llm import LocalLlm
@@ -30,7 +30,7 @@ def get_llm(model="gemini-1.5-flash") -> LLM:  # try原来为默认模型
         else:
             raise ValueError("LOCAL_LLM_URL not set")
     elif "llama" in model:
-        # Currently use Anyscale to support llama models
+        # Currently use Anyscale to support llama model
         from realtime_ai_character.llm.anyscale_llm import AnysacleLlm
 
         return AnysacleLlm(model=model)
@@ -58,7 +58,7 @@ def get_chat_model(model="gemini-1.5-flash") -> BaseChatModel:
 
         return AnthropicLlm(model=model).chat_anthropic
     elif "localhost" in model:
-        # Currently use llama2-wrapper to run local llama models
+        # Currently use llama2-wrapper to run local llama model
         local_llm_url = os.getenv("LOCAL_LLM_URL", "")
         if local_llm_url:
             from realtime_ai_character.llm.local_llm import LocalLlm
@@ -67,7 +67,7 @@ def get_chat_model(model="gemini-1.5-flash") -> BaseChatModel:
         else:
             raise ValueError("LOCAL_LLM_URL not set")
     elif "llama" in model:
-        # Currently use Anyscale to support llama models
+        # Currently use Anyscale to support llama model
         from realtime_ai_character.llm.anyscale_llm import AnysacleLlm
 
         return AnysacleLlm(model=model).chat_open_ai

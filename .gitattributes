@@ -1,2 +1,14 @@
+node_modules/@babel/runtime/helpers/decorate.js filter=lfs diff=lfs merge=lfs -text
+node_modules/sharp/src/binding.gyp filter=lfs diff=lfs merge=lfs -text
+node_modules/nanoid/non-secure/package.json filter=lfs diff=lfs merge=lfs -text
+client/next-web/public/assets/svgs/subway.png filter=lfs diff=lfs merge=lfs -text
+node_modules/@babel/runtime/helpers/esm/wrapNativeSuper.js filter=lfs diff=lfs merge=lfs -text
+node_modules/nanoid/non-secure/index.d.ts filter=lfs diff=lfs merge=lfs -text
+node_modules/next-auth/src/providers/twitch.ts filter=lfs diff=lfs merge=lfs -text
+node_modules/@babel/runtime/helpers/esm/decorate.js filter=lfs diff=lfs merge=lfs -text
+client/mobile/android/RealChar/app/src/main/res/mipmap-mdpi/ic_launcher.webp filter=lfs diff=lfs merge=lfs -text
+node_modules/next-auth/src/providers/google.ts filter=lfs diff=lfs merge=lfs -text
+*.node filter=lfs diff=lfs merge=lfs -text
+*.incomplete filter=lfs diff=lfs merge=lfs -text
 node_modules/@next/swc-win32-x64-msvc/next-swc.win32-x64-msvc.node filter=lfs diff=lfs merge=lfs -text
 realtime_ai_character/model/zh-en/models--Helsinki-NLP--opus-mt-zh-en/blobs/* filter=lfs diff=lfs merge=lfs -text

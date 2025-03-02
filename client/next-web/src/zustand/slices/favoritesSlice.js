@@ -1,17 +1,16 @@
-// 该文件用于管理用户收藏的单词
-export const createFavoritesSlice = (set, get) => ({
-  favoriteWords: [], // 使用数组代替 Set
 
-  addFavorite: (word) => {
-    const updatedFavorites = [...get().favoriteWords, word];
+export const createFavoritesSlice = (set, get) => ({
+  favoriteWords: [],
+
+  addFavorite: (wordInfo) => {
+    const updatedFavorites = [...get().favoriteWords, wordInfo];
     set({ favoriteWords: updatedFavorites });
   },
 
   removeFavorite: (word) => {
-    const updatedFavorites = get().favoriteWords.filter(w => w !== word);
+    const updatedFavorites = get().favoriteWords.filter((w) => w.word !== word);
     set({ favoriteWords: updatedFavorites });
   },
 
-  isFavorite: (word) => get().favoriteWords.includes(word),
+  isFavorite: (word) => get().favoriteWords.some((w) => w.word === word),
 });
-

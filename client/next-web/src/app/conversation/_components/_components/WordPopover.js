@@ -3,29 +3,41 @@ import { RiStarLine, RiStarFill } from 'react-icons/ri';  // 引入收藏图标
 import { useAppStore } from '@/zustand/store'; // 引入状态管理
 
 export default function WordPopover({ word }) {
+  const [selectedWord, setSelectedWord] = useState('');
   const [wordInfo, setWordInfo] = useState({ definition: '', usage: '', audioUrl: '' });
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
   const popoverRef = useRef(null);
   const selectedWordRef = useRef(null);
 
+
   const { addFavorite, removeFavorite, isFavorite } = useAppStore(); // 从zustand获取收藏相关功能
+
+  const handleFavoriteClick = () => {
+    const favoriteData = { word: selectedWord, ...wordInfo };
+    if (isFavorite(selectedWord)) {
+      removeFavorite(selectedWord);
+    } else {
+      addFavorite(favoriteData);
+    }
+  };
 
   const fetchWordInfo = async (word) => {
     try {
-      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+      const response = await fetch(`http://127.0.0.1:18080/api/word/${word}`);
       if (response.ok) {
         const data = await response.json();
-        const definition = data[0]?.meanings[0]?.definitions[0]?.definition || '未找到该单词的定义';
-        const usage = data[0]?.meanings[0]?.definitions[0]?.example || '无例句';
-        const audioUrl = data[0]?.phonetics.find((phonetic) => phonetic.audio)?.audio || '';
-        setWordInfo({ definition, usage, audioUrl });
+        const { phonetic, translation } = data;
+        setWordInfo({
+          phonetic: phonetic || "无音标",
+          translation: translation || "无翻译",
+        });
       } else {
-        setWordInfo({ definition: '未找到该单词的定义', usage: '', audioUrl: '' });
+        setWordInfo({ phonetic: "无音标", translation: "无翻译" });
       }
     } catch (error) {
-      console.error('Error fetching word info:', error);
-      setWordInfo({ definition: '获取信息失败', usage: '', audioUrl: '' });
+      console.error("Error fetching word info:", error);
+      setWordInfo({ phonetic: "获取失败", translation: "获取失败" });
     }
   };
 
@@ -34,6 +46,7 @@ export default function WordPopover({ word }) {
     if (!cleanWord) return;
 
     const { clientX, clientY } = event;
+    setSelectedWord(cleanWord);
     fetchWordInfo(cleanWord);
 
     // 更新弹窗位置，确保其在单词旁边
@@ -53,6 +66,8 @@ export default function WordPopover({ word }) {
     }
   };
 
+  
+
   useEffect(() => {
     if (isPopoverVisible) {
       document.addEventListener('mousedown', handleClickOutside);
@@ -71,13 +86,7 @@ export default function WordPopover({ word }) {
     }
   };
 
-  const handleFavoriteClick = () => {
-    if (isFavorite(word)) {
-      removeFavorite(word);  // 如果已经收藏，移除收藏
-    } else {
-      addFavorite(word);  // 如果没有收藏，添加收藏
-    }
-  };
+
 
   return (
     <>
@@ -110,10 +119,11 @@ export default function WordPopover({ word }) {
             )}
           </button>
 
-          <p className="text-sm text-gray-800 mb-2">定义：{wordInfo.definition}</p>
-          {wordInfo.usage !== '无例句' && wordInfo.usage && (
-            <p className="text-sm text-gray-700 mb-2">用法：{wordInfo.usage}</p>
+          <p className="text-sm text-gray-800 mb-2">音标：{wordInfo.phonetic}</p>
+          {wordInfo.translation !== '无翻译' && wordInfo.translation && (
+            <p className="text-sm text-gray-700 mb-2">翻译：{wordInfo.translation}</p>
           )}
+
           {wordInfo.audioUrl && (
             <button
               onClick={playPronunciation}

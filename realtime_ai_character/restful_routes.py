@@ -24,6 +24,8 @@ from firebase_admin.exceptions import FirebaseError
 from google.cloud import storage
 from sqlalchemy import func,create_engine
 from sqlalchemy.orm import Session,sessionmaker
+from transformers import pipeline
+
 from realtime_ai_character.audio.text_to_speech import get_text_to_speech
 from realtime_ai_character.database.connection import get_db
 from realtime_ai_character.llm.highlight_action_generator import (
@@ -43,6 +45,8 @@ from realtime_ai_character.models.character import (
 )
 
 from dotenv import load_dotenv
+
+from realtime_ai_character.models.localsranslate import WordInfo, get_word_info
 
 load_dotenv()
 router = APIRouter()
@@ -87,14 +91,38 @@ class SceneResponse(BaseModel):
     category: str  # 添加类别字段
 
     class Config:
-        # from_attributes = True  # 使用新的配置键
+        from_attributes = True  # 使用新的配置键
         orm_mode = True  # 确保启用 ORM 模式
 
 
 # 创建 APIRouter 实例
 router = APIRouter()
+en_zh_pipe = pipeline("translation_en_to_zh", model="Helsinki-NLP/opus-mt-en-zh")
+zh_en_pipe = pipeline("translation_zh_to_en", model="Helsinki-NLP/opus-mt-zh-en")
+class TranslateRequest(BaseModel):
+    text: str
+    direction: str = "en-zh"  # 默认翻译方向为英文 -> 中文
+@router.post("/translate")
+async def translate_text(request: TranslateRequest):
+    text = request.text
+    direction = request.direction
+    if not text:
+        raise HTTPException(status_code=400, detail="Text to translate cannot be empty")
 
+    # 根据翻译方向选择模型
+    if direction == "zh-en":
+        translated = zh_en_pipe(text)
+    elif direction == "en-zh":
+        translated = en_zh_pipe(text)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid translation direction")
 
+    # 提取翻译结果
+    translated_text = translated[0]["translation_text"]
+    return {"translated_text": translated_text}
+@router.get("/api/word/{word}", response_model=WordInfo)
+def fetch_word_info(word: str):
+    return get_word_info(word)
 # 获取所有 scenes 的 API
 @router.get("/scenes", response_model=List[SceneResponse])
 def get_scenes(db: Session = Depends(get_db)):
